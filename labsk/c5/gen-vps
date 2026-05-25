@@ -1,0 +1,3 @@
+#!/bin/sh
+az/vm-archlinux >~/.vps
+echo "$(dig +short $(cat ~/.vps)) vps" | sudo tee -a /etc/hosts
