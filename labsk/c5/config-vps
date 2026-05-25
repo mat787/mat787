@@ -1,8 +1,0 @@
-#!/bin/sh
-ssh $(cat ~/.vps) <<'E'
-sudo chsh -s /bin/zsh $USER
-mkdir -p ~/bin
-echo 'PATH=~/bin:$PATH' >>~/.zshrc
-echo 'ip -br $*' >~/bin/ipb && chmod +x ~/bin/ipb
-sudo iptables -I INPUT -p icmp -j ACCEPT
-E
