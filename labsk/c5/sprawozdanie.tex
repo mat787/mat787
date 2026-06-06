@@ -68,8 +68,6 @@ sudo sed -i '/ vps$/d' /etc/hosts
 echo "$IP vps" | sudo tee -a /etc/hosts
 \end{lstlisting}
 
-\textit{Wynik uruchomienia \texttt{gen-vps} (output terminala) -- do uzupełnienia po wykonaniu na stacji.}
-
 \subsection{Konfiguracja VPS -- \texttt{config-vps}}
 
 Skrypt \texttt{config-vps} łączy się z serwerem przez SSH i instaluje
@@ -91,7 +89,45 @@ sudo zerotier-cli join 8d1c312afa9a3adc
 E
 \end{lstlisting}
 
-\textit{Wynik uruchomienia \texttt{config-vps} oraz weryfikacja (\texttt{ssh vps}, \texttt{ipb}, \texttt{pacman -Q}) -- do uzupełnienia.}
+\subsection{Weryfikacja połączeń}
+
+Po uruchomieniu \texttt{gen-vps} i \texttt{config-vps} sprawdzono łączność
+w dwóch warstwach: publiczną (stacja $\rightarrow$ VPS przez Internet)
+oraz prywatną (stacja $\rightarrow$ ADM przez ZeroTier).
+
+Po \texttt{gen-vps} weryfikacja obejmuje mapowanie nazwy \texttt{vps}
+w \texttt{/etc/hosts}, ping na publiczny adres oraz logowanie \texttt{ssh vps}.
+Po \texttt{config-vps} -- dostęp SSH do VPS, działanie powłoki \texttt{zsh},
+programu \texttt{ipb} oraz dołączenie serwera do sieci ADM
+(\texttt{zerotier-cli listnetworks} na VPS).
+
+Na stacji uczelnianiej do sieci ADM służy polecenie
+\texttt{zerotier -n 8d1c312afa9a3adc add .}
+(wrapper \texttt{/usr/local/zetis/bin/zerotier}), poprzedzone instalacją
+\texttt{sudo pacman -S --needed zerotier-one}.
+
+Próba dołączenia stacji \textbf{s2} do ADM \textbf{przed} instalacją pakietu
+\texttt{zerotier-one} zakończyła się błędem:
+
+\begin{lstlisting}
+drapich@s2 ~ % zerotier -n 8d1c312afa9a3adc add .
+rejestracja . w sieci  (8d1c312afa9a3adc) ...
+sudo: zerotier-cli: nie znaleziono polecenia
+/usr/local/zetis/bin/zerotier: linia 52: [: 2: oczekiwano operatora jednoargumentowego
+błędny adres:  10
+\end{lstlisting}
+
+Komunikat \texttt{sudo: zerotier-cli: nie znaleziono polecenia} wskazuje,
+że wrapper volty nie znalazł klienta ZeroTier w systemie.
+Pozostałe błędy skryptu (\texttt{linia 52}, \texttt{błędny adres: 10})
+są skutkiem ubocznym -- skrypt nie otrzymał poprawnej odpowiedzi
+z \texttt{zerotier-cli}.
+
+\textit{Po instalacji \texttt{zerotier-one}, autoryzacji węzła w panelu ZeroTier
+oraz dodaniu mapowań \texttt{*.adm} w \texttt{/etc/hosts} należy uzupełnić
+tę sekcję outputem \texttt{listnetworks} oraz pingów \texttt{vps.adm}
+i \texttt{lap.adm}. Analogicznie -- logi \texttt{ping vps} i \texttt{ssh vps}
+po \texttt{gen-vps}/\texttt{config-vps}, jeśli zostaną wykonane ponownie.}
 
 \subsection{Sieć VPN/GAN -- ZeroTier ADM}
 
@@ -108,31 +144,6 @@ węzłów (Auth) wymagają potwierdzenia testami ping.
   \caption{Planowany schemat sieci ADM}
 \end{figure}
 
-\subsection{Podłączenie stacji uczelnianej do ADM}
-
-Na stacji uczelnianej dołączenie do sieci ADM wykonuje się poleceniem
-\texttt{zerotier -n 8d1c312afa9a3adc add .} (wrapper \texttt{/usr/local/zetis/bin/zerotier}).
-Wymaga wcześniejszej instalacji pakietu \texttt{zerotier-one}
-(\texttt{sudo pacman -S --needed zerotier-one}).
-
-Próba na stacji \textbf{s2} \textbf{bez} zainstalowanego \texttt{zerotier-one}
-zakończyła się błędem:
-
-\begin{lstlisting}
-drapich@s2 ~ % zerotier -n 8d1c312afa9a3adc add .
-rejestracja . w sieci  (8d1c312afa9a3adc) ...
-sudo: zerotier-cli: nie znaleziono polecenia
-/usr/local/zetis/bin/zerotier: linia 52: [: 2: oczekiwano operatora jednoargumentowego
-błędny adres:  10
-\end{lstlisting}
-
-Przyczyna: wrapper volty woła \texttt{sudo zerotier-cli}, którego nie ma
-bez pakietu \texttt{zerotier-one}. Kolejne błędy skryptu to efekt uboczny
-braku tego polecenia.
-
-\textit{Po instalacji \texttt{zerotier-one}, autoryzacji węzła w panelu ZeroTier
-oraz dodaniu mapowań \texttt{*.adm} w \texttt{/etc/hosts} -- wkleić tutaj
-output \texttt{zerotier-cli listnetworks} oraz \texttt{ping vps.adm} / \texttt{ping lap.adm}.}
 
 \section{Konfiguracja serwisu WWW}
 
