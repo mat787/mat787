@@ -1,42 +1,57 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="850" height="500" viewBox="0 0 850 500">
+<svg xmlns="http://www.w3.org/2000/svg" width="850" height="600" viewBox="0 0 850 600">
+  <rect width="850" height="600" fill="#3a3a3a"/>
+  <defs>
+    <pattern id="g" width="20" height="20" patternUnits="userSpaceOnUse">
+      <path d="M 20 0 L 0 0 0 20" fill="none" stroke="#444" stroke-width="0.5"/>
+    </pattern>
+  </defs>
+  <rect width="850" height="600" fill="url(#g)"/>
   <style>
-    .t{font:14px sans-serif;fill:#222}.s{font:12px sans-serif;fill:#444}
-    .m{font:11px monospace;fill:#333}.h{font:10px sans-serif;fill:#666}
-    .n{fill:#fff;stroke:#000;stroke-width:2}.c{stroke-width:2;fill-opacity:.15}
-    .l{fill:none;stroke-width:2}
+    .n{fill:#fff;stroke:#000;stroke-width:2}
+    .t{font:14px sans-serif;fill:#fff;font-weight:bold}
+    .c{font:12px sans-serif;fill:#fff}
+    .m{font:12px monospace;fill:#fff}
+    .h{font:10px sans-serif;fill:#aaa}
+    .l{stroke:#fff;stroke-width:2;fill:none}
+    .d{stroke:#aaa;stroke-width:1;fill:none;stroke-dasharray:6 6}
   </style>
-  <ellipse class="c" cx="420" cy="75" rx="130" ry="40" fill="#dae8fc" stroke="#6c8ebf"/>
-  <text class="t" x="420" y="80" text-anchor="middle">Internet</text>
-  <text class="m" x="420" y="130" text-anchor="middle">.IP = vps</text>
-  <text class="m" x="420" y="145" text-anchor="middle">74.248.150.53</text>
-  <text class="h" x="420" y="160" text-anchor="middle">drapich.polandcentral.cloudapp.azure.com</text>
 
-  <ellipse class="c" cx="420" cy="345" rx="150" ry="50" fill="#d5e8d4" stroke="#82b366"/>
-  <text class="t" x="420" y="335" text-anchor="middle">VPN/GAN — ZeroTier ADM</text>
-  <text class="s" x="420" y="352" text-anchor="middle">10.80.108.0/24</text>
-  <text class="h" x="420" y="395" text-anchor="middle">NetID: 8d1c312afa9a3adc</text>
+  <!-- Internet -->
+  <ellipse cx="425" cy="70" rx="100" ry="45" fill="#f5f5f5" stroke="#666"/>
+  <text x="425" y="75" text-anchor="middle" fill="#333" font-size="14">Internet</text>
 
-  <circle class="n" cx="120" cy="170" r="40"/><text class="t" x="120" y="175" text-anchor="middle">sX</text>
-  <text class="s" x="120" y="225" text-anchor="middle">stacja s2</text>
+  <!-- VPN/GAN -->
+  <ellipse cx="620" cy="430" rx="110" ry="55" fill="#2d5016" stroke="#82b366"/>
+  <text x="620" y="418" text-anchor="middle" class="c">VPN/GAN</text>
+  <text x="620" y="435" text-anchor="middle" class="c">Zerotier/Tailscale</text>
+  <text x="620" y="452" text-anchor="middle" class="c">ADM</text>
+  <text x="620" y="505" text-anchor="middle" class="c">10.80.108 / 24</text>
 
-  <circle class="n" cx="120" cy="360" r="40"/><text class="t" x="120" y="365" text-anchor="middle">Lap</text>
-  <text class="s" x="120" y="415" text-anchor="middle">MacBook</text>
-  <text class="m" x="200" y="410">.IP = lap.adm</text>
-  <text class="m" x="200" y="425">10.80.108.105</text>
+  <!-- nodes -->
+  <circle class="n" cx="125" cy="145" r="42"/><text class="t" x="125" y="150" text-anchor="middle" fill="#000">sX</text>
+  <text class="m" x="125" y="210" text-anchor="middle">.IP = sX</text>
 
-  <circle class="n" cx="720" cy="230" r="40"/><text class="t" x="720" y="235" text-anchor="middle">VPS</text>
-  <text class="s" x="720" y="285" text-anchor="middle">Azure Arch</text>
-  <text class="h" x="720" y="300" text-anchor="middle">eth0: 10.0.0.4/24</text>
-  <text class="m" x="560" y="320">.IP = vps.adm</text>
-  <text class="m" x="560" y="335">10.80.108.71</text>
+  <circle class="n" cx="725" cy="145" r="42"/><text class="t" x="725" y="150" text-anchor="middle" fill="#000">VPS</text>
 
-  <line class="l" stroke="#6c8ebf" x1="160" y1="165" x2="300" y2="90"/>
-  <line class="l" stroke="#6c8ebf" x1="540" y1="90" x2="680" y2="210"/>
-  <circle fill="#6c8ebf" cx="175" cy="150" r="6"/>
-  <circle fill="#6c8ebf" cx="690" cy="210" r="6"/>
+  <circle class="n" cx="125" cy="425" r="42"/><text class="t" x="125" y="430" text-anchor="middle" fill="#000">Lap</text>
+  <text class="m" x="125" y="495" text-anchor="middle">.IP = lap.adm</text>
+  <text class="h" x="125" y="512" text-anchor="middle">10.80.108.105</text>
 
-  <line class="l" stroke="#82b366" x1="160" y1="355" x2="300" y2="340"/>
-  <line class="l" stroke="#82b366" x1="540" y1="340" x2="690" y2="260"/>
-  <circle fill="#82b366" cx="175" cy="345" r="6"/>
-  <circle fill="#82b366" cx="680" cy="255" r="6"/>
+  <!-- dots -->
+  <circle fill="#06c" cx="165" cy="145" r="7"/>
+  <circle fill="#06c" cx="685" cy="145" r="7"/>
+  <circle fill="#0a0" cx="165" cy="425" r="7"/>
+  <circle fill="#0a0" cx="755" cy="195" r="7"/>
+
+  <!-- labels -->
+  <text class="m" x="530" y="100" text-anchor="middle">.IP = vps</text>
+  <text class="h" x="530" y="115" text-anchor="middle">74.248.150.53</text>
+  <text class="m" x="650" y="285" text-anchor="middle">.IP = vps.adm</text>
+  <text class="h" x="650" y="300" text-anchor="middle">10.80.108.71</text>
+
+  <!-- lines -->
+  <path class="l" d="M 167 145 L 330 70 L 680 145"/>
+  <path class="l" d="M 167 425 L 520 430 L 690 195"/>
+  <path class="d" d="M 167 425 L 200 420 L 200 70 L 330 70" marker-end="url(#arr)"/>
+  <defs><marker id="arr" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 z" fill="#aaa"/></marker></defs>
 </svg>
