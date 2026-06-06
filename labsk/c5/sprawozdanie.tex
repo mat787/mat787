@@ -3,187 +3,77 @@
 \usepackage[T1]{fontenc}
 \usepackage[polish]{babel}
 \usepackage{geometry}
+\usepackage{graphicx}
+\usepackage{svg}
 \usepackage{listings}
 \usepackage{xcolor}
-\usepackage{tikz}
-\usetikzlibrary{calc}
 \geometry{margin=2cm}
 \lstset{
-  basicstyle=\ttfamily\small,
+  basicstyle=\ttfamily\footnotesize,
   breaklines=true,
   frame=single,
   backgroundcolor=\color{gray!8},
-  aboveskip=4pt,belowskip=4pt
+  aboveskip=2pt,belowskip=2pt
 }
-\title{LabSK c5 --- Konfiguracja serwera w chmurze}
+
+\title{LabSK\,/\,5: Konfiguracja serwera w chmurze}
 \author{drapich \quad grupa poniedziałek 9P}
 \date{2026-06-06}
 
 \begin{document}
 \maketitle
+\vspace{-1.2em}
 
-\section{Schemat sieci ADM}
+\section*{Cel ćwiczenia}
+Skryptowa konfiguracja serwera VPS w Azure (zsh, agent AI, ZeroTier/ADM)
+oraz instalacja wybranego serwisu WWW (nginx).
+Skrypty \texttt{gen-vps}, \texttt{config-vps}, \texttt{config-www} w katalogu \texttt{c5}.
 
+\section*{Schemat sieci ADM}
 \begin{center}
-\begin{tikzpicture}[
-  cloud/.style={ellipse, draw=#1, fill=#1!15, minimum width=3.2cm, minimum height=1.4cm, align=center, font=\small},
-  node/.style={circle, draw, minimum size=1.1cm, font=\small},
-  dot/.style={circle, fill=#1, inner sep=2pt},
-  lbl/.style={font=\scriptsize}
-]
-  % chmury
-  \node[cloud=blue!60] (inet) at (0,2.2) {Internet};
-  \node[cloud=green!60!black] (adm) at (0,-1.8) {ADM\\ZeroTier\\10.80.108.0/24};
-
-  % węzły
-  \node[node] (sx)  at (-4.2,0.3) {sX};
-  \node[node] (lap) at (-4.2,-3.3) {Lap};
-  \node[node] (vps) at (4.2,0.3) {VPS};
-
-  % niebieska (publiczna)
-  \draw (sx.east) -- (sx.east-|inet.west);
-  \draw (inet.east) -- (vps.west-|inet.east);
-  \node[dot=blue] at ($(sx)!0.55!(inet)$) {};
-  \node[dot=blue] at ($(vps)!0.55!(inet)$) {};
-  \node[lbl, anchor=north] at (0,1.0) {vps = 74.248.150.53};
-
-  % zielona (ZeroTier)
-  \draw (lap.east) -- (lap.east-|adm.west);
-  \draw (adm.east) -- (vps.south-|adm.east);
-  \node[dot=green!60!black] at ($(lap)!0.55!(adm)$) {};
-  \node[dot=green!60!black] at ($(vps)!0.55!(adm)$) {};
-  \node[lbl, anchor=north] at (0,-3.0) {vps.adm = 10.80.108.71 \quad lap.adm = 10.80.108.105};
-
-  % etykiety węzłów
-  \node[lbl, below=2pt of sx] {stacja s2};
-  \node[lbl, below=2pt of lap] {MacBook};
-  \node[lbl, below=2pt of vps] {Azure Arch};
-\end{tikzpicture}
+\includesvg[width=0.92\linewidth]{ADM.svg}
 \end{center}
+\noindent{\small Stacja sX łączy się z VPS po publicznym IP (niebieska).
+Laptop i VPS są w sieci ZeroTier ADM (zielona). Plik: \texttt{ADM.drawio}.}
 
-\noindent\textbf{NetID ADM:} \texttt{8d1c312afa9a3adc}
+\section*{Zadania i dowody wykonania}
 
-\section{Cel 1 --- Skryptowa konfiguracja serwera w chmurze}
-
-\subsection{gen-vps --- generacja VPS}
-
+\textbf{1. Generacja VPS} --- skrypt \texttt{gen-vps} tworzy Archlinux w Azure, zapisuje DNS w \texttt{\textasciitilde/.vps}, mapuje \texttt{vps} w \texttt{/etc/hosts}.
 \begin{lstlisting}
 $ gen-vps
 74.248.150.53 vps
-\end{lstlisting}
-\begin{lstlisting}
 $ cat ~/.vps
 drapich.polandcentral.cloudapp.azure.com
 \end{lstlisting}
-\begin{lstlisting}
-$ grep vps /etc/hosts
-74.248.150.53 vps
-\end{lstlisting}
 
-\subsection{config-vps --- zsh, ipb, ZeroTier, gemini-cli}
-
+\textbf{2. Konfiguracja VPS} --- \texttt{config-vps}: zsh, \texttt{~/bin/ipb}, gemini-cli, dołączenie do ADM.
 \begin{lstlisting}
 $ config-vps
 200 join OK
-\end{lstlisting}
-\begin{lstlisting}
-$ ssh vps "echo $SHELL"
-/usr/bin/zsh
-\end{lstlisting}
-\begin{lstlisting}
 $ ssh vps "ipb a"
-lo               UNKNOWN        127.0.0.1/8 ...
-eth0             UP             10.0.0.4/24 ...
-ztu7tkwebg       UNKNOWN        10.80.108.71/24 ...
-\end{lstlisting}
-\begin{lstlisting}
-$ ssh vps 'sudo zerotier-cli listnetworks'
-200 listnetworks 8d1c312afa9a3adc ADM ... OK PRIVATE ztu7tkwebg 10.80.108.71/24
-\end{lstlisting}
-\begin{lstlisting}
+eth0 ... 10.0.0.4/24
+ztu7tkwebg ... 10.80.108.71/24
 $ ssh vps 'pacman -Q gemini-cli'
 gemini-cli 1:0.45.2-1
 \end{lstlisting}
 
-\subsection{VPN/GAN --- sieć prywatna ADM}
-
-\textbf{VPS} (ZeroTier):
+\textbf{3. Sieć VPN/GAN (ZeroTier ADM)} --- VPS i laptop w sieci prywatnej; stacja sX po publicznym IP.
 \begin{lstlisting}
 $ ssh vps 'sudo zerotier-cli listnetworks'
-... 10.80.108.71/24
-\end{lstlisting}
-
-\textbf{Lap} (MacBook, wcześniejszy test):
-\begin{lstlisting}
-$ ping -c1 vps.adm
-64 bytes from 10.80.108.71 ...
-$ ping -c1 lap.adm
-64 bytes from 10.80.108.105 ...
-\end{lstlisting}
-
-\textbf{sX} --- połączenie publiczne (bez ZeroTier):
-\begin{lstlisting}
+... ADM ... OK ... 10.80.108.71/24
 $ ping -c1 vps
-64 bytes from vps (74.248.150.53) ...
+64 bytes from 74.248.150.53
+$ ping -c1 vps.adm    # MacBook
+64 bytes from 10.80.108.71
 \end{lstlisting}
 
-\section{Cel 2 --- Serwis WWW (nginx)}
-
-\begin{lstlisting}
-$ config-www
-Created symlink ... nginx.service
-\end{lstlisting}
-\begin{lstlisting}
-$ ssh vps 'systemctl is-active nginx'
-active
-\end{lstlisting}
+\textbf{4. Serwis WWW (nginx)} --- \texttt{config-www} instaluje i uruchamia nginx.
 \begin{lstlisting}
 $ curl -I http://vps
 HTTP/1.1 200 OK
 Server: nginx/1.30.2
-\end{lstlisting}
-\begin{lstlisting}
-$ curl http://vps | head -3
+$ curl http://vps | head -1
 <!DOCTYPE html>
-<html>
-<head>
-\end{lstlisting}
-
-\section{Skrypty}
-
-\subsection{gen-vps}
-\begin{lstlisting}
-#!/bin/sh
-/pub/Linux/zetis/bin/az/register; /pub/Linux/zetis/bin/az/nsg -a
-/pub/Linux/zetis/bin/az/archlinux -k; /pub/Linux/zetis/bin/az/archlinux -s
-DNS=$USER.polandcentral.cloudapp.azure.com
-echo $DNS > ~/.vps
-IP=$(az network public-ip show -n $USER --query ipAddress -o tsv)
-sudo sed -i '/ vps$/d' /etc/hosts
-echo "$IP vps" | sudo tee -a /etc/hosts
-\end{lstlisting}
-
-\subsection{config-vps}
-\begin{lstlisting}
-#!/bin/sh
-ssh -T vps <<'E'
-sudo pacman -S --needed --noconfirm zsh zerotier-one gemini-cli
-sudo systemctl enable --now zerotier-one.service
-sudo usermod -s /usr/bin/zsh $USER
-mkdir -p ~/bin
-printf 'ip -br $*\n' >~/bin/ipb && chmod +x ~/bin/ipb
-echo 'export PATH="$HOME/bin:$PATH"' >>~/.zshenv
-sudo zerotier-cli join 8d1c312afa9a3adc
-E
-\end{lstlisting}
-
-\subsection{config-www}
-\begin{lstlisting}
-#!/bin/sh
-ssh -T vps <<'E'
-sudo pacman -S --needed --noconfirm nginx
-sudo systemctl enable --now nginx.service
-E
 \end{lstlisting}
 
 \end{document}

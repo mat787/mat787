@@ -1,0 +1,42 @@
+% Szkielet sprawozdania LabSK — kopiuj do labsk/cX/sprawozdanie.tex
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[polish]{babel}
+\usepackage{geometry}
+\usepackage{graphicx}
+\usepackage{listings}
+\usepackage{xcolor}
+\geometry{margin=2.2cm}
+\lstset{
+  basicstyle=\ttfamily\footnotesize,
+  breaklines=true,
+  frame=single,
+  backgroundcolor=\color{gray!8},
+  aboveskip=2pt,belowskip=2pt,
+  xleftmargin=4pt,xrightmargin=4pt
+}
+% --- wypełnij ---
+\newcommand{\autor}{Imię Nazwisko}
+\newcommand{\album}{000000}
+\newcommand{\cwiczenie}{X}
+\newcommand{\temat}{Temat ćwiczenia}
+\newcommand{\grupa}{gr. ...}
+
+\title{LabSK\,/\,\cwiczenie: \temat}
+\author{\autor \quad nr\,albumu:\,\album \quad \grupa}
+\date{\today}
+
+\begin{document}
+\maketitle
+\vspace{-1.5em}
+
+% Schemat: \includegraphics[width=\linewidth]{ADM.svg}
+
+\section*{Cel ćwiczenia}
+% Skopiuj treść z Cel-ćwiczenia.txt — 2--3 zdania.
+
+\section*{Zadania i dowody wykonania}
+% Dla każdego zadania: 1 zdanie opisu + wywołanie + wynik (max.~10 linii).
+
+\end{document}
