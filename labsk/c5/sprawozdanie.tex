@@ -41,80 +41,120 @@
 \thispagestyle{empty}
 \maketitle
 
+\vspace{-0.5em}
+Celem ćwiczenia była skryptowa konfiguracja serwera VPS w chmurze Azure
+oraz podłączenie urządzeń do prywatnej sieci ZeroTier ADM.
+Przygotowano trzy skrypty w \texttt{/bin/sh}: \texttt{gen-vps}, \texttt{config-vps}
+oraz \texttt{config-www}. Serwer działa w regionie PolandCentral
+z publicznym adresem \texttt{74.248.150.53} i adresem ADM \texttt{10.80.108.71}.
+
 \section{Skryptowa konfiguracja serwera w chmurze}
 
 \subsection{Generacja VPS -- \texttt{gen-vps}}
 
-Skrypt tworzy maszynę Archlinux w Azure, zapisuje DNS w \texttt{\TY/.vps}
-i mapuje nazwę \texttt{vps} na publiczny adres IP w \texttt{/etc/hosts}.
+Skrypt \texttt{gen-vps} rejestruje zasoby Azure (\texttt{az/register}, \texttt{az/nsg -a}),
+tworzy maszynę wirtualną Archlinux (\texttt{az/archlinux -k}) i konfiguruje
+mapowanie nazw na stacji roboczej. Adres DNS serwera trafia do pliku
+\texttt{\TY/.vps}, a nazwa \texttt{vps} jest mapowana w \texttt{/etc/hosts}
+na publiczny adres IP. Dzięki temu możliwe jest logowanie poleceniem
+\texttt{ssh vps} bez podawania pełnej nazwy DNS.
 
 \begin{lstlisting}
-drapich@s2 ~ % gen-vps
+drapich@s3 ~ % gen-vps
 ResourceGroup  PowerState   PublicIpAddress  Fqdns
 LabSK          VM running   74.248.150.53    drapich.polandcentral.cloudapp.azure.com
 74.248.150.53 vps
-drapich@s2 ~ % cat ~/.vps
+drapich@s3 ~ % cat ~/.vps
 drapich.polandcentral.cloudapp.azure.com
-drapich@s2 ~ % grep vps /etc/hosts
+drapich@s3 ~ % grep vps /etc/hosts
 74.248.150.53 vps
 \end{lstlisting}
 
 \subsection{Konfiguracja VPS -- \texttt{config-vps}}
 
-Skrypt instaluje \texttt{zsh}, agenta \texttt{gemini-cli}, tworzy \texttt{~/bin/ipb}
-oraz dołącza serwer do sieci ZeroTier ADM.
+Skrypt \texttt{config-vps} łączy się z serwerem przez SSH i instaluje
+wymagane oprogramowanie: powłokę \texttt{zsh}, agenta AI \texttt{gemini-cli}
+oraz klienta \texttt{zerotier-one}. Tworzy katalog \texttt{~/bin} z programem
+\texttt{ipb} (skrót do \texttt{ip -br}) i dołącza VPS do sieci ADM.
+Reguły NSG w Azure (\texttt{LabSK-NSG}) przepuszczają ruch SSH, ICMP
+oraz port ZeroTier UDP 9993.
 
 \begin{lstlisting}
-drapich@s2 ~ % config-vps
+drapich@s3 ~ % config-vps
 200 join OK
-drapich@s2 ~ % ssh vps "echo $SHELL"
+drapich@s3 ~ % ssh vps "echo $SHELL"
 /usr/bin/zsh
-drapich@s2 ~ % ssh vps "ipb a"
+drapich@s3 ~ % ssh vps "ipb a"
 lo         UNKNOWN  127.0.0.1/8 ...
 eth0       UP       10.0.0.4/24 ...
 ztu7tkwebg UNKNOWN  10.80.108.71/24 ...
-drapich@s2 ~ % ssh vps 'pacman -Q gemini-cli'
+drapich@s3 ~ % ssh vps 'pacman -Q gemini-cli'
 gemini-cli 1:0.45.2-1
 \end{lstlisting}
 
 \subsection{Sieć VPN/GAN -- ZeroTier ADM}
 
-Sieć prywatna ADM (\texttt{8d1c312afa9a3adc}, \texttt{10.80.108.0/24}).
-VPS i laptop w ADM; stacja sX łączy się z VPS po publicznym IP.
-
-\begin{lstlisting}
-drapich@s2 ~ % ssh vps 'sudo zerotier-cli listnetworks'
-200 listnetworks 8d1c312afa9a3adc ADM ... OK PRIVATE ztu7tkwebg 10.80.108.71/24
-drapich@s2 ~ % ping -c1 vps
-64 bytes from vps (74.248.150.53): icmp_seq=1 ttl=46 time=12.7 ms
-mat@mat ~ % ping -c1 vps.adm
-64 bytes from 10.80.108.71: icmp_seq=0 ttl=64 time=22.3 ms
-mat@mat ~ % ping -c1 lap.adm
-64 bytes from 10.80.108.105: icmp_seq=0 ttl=64 time=0.103 ms
-\end{lstlisting}
+Sieć prywatna ADM została utworzona w panelu ZeroTier
+(\texttt{my.zerotier.com}). Parametry sieci: NetID \texttt{8d1c312afa9a3adc},
+zakres adresów \texttt{10.80.108.0/24}. Do sieci podłączono trzy urządzenia:
+serwer VPS (\texttt{vps.adm}), laptop (\texttt{lap.adm}) oraz stację s3
+(\texttt{sx.adm}). Każde urządzenie otrzymało stały adres IP w panelu
+(Managed IPs) i zostało autoryzowane (Auth).
 
 \begin{figure}[H]
   \centering
-  \includesvg[width=0.55\textwidth]{ADM.svg}
-  \caption{Schemat sieci ADM}
+  \includesvg[width=0.58\textwidth]{ADM.svg}
+  \caption{Schemat sieci ADM -- połączenia publiczne (niebieskie)
+  i prywatne ZeroTier (zielone)}
 \end{figure}
+
+\subsection{Podłączenie stacji s3 do ADM}
+
+Na stacji s3 zainstalowano klienta ZeroTier i dołączono ją do sieci
+poleceniem \texttt{zerotier -n 8d1c312afa9a3adc add .}.
+W panelu ZeroTier przypisano adres \texttt{10.80.108.19}.
+Następnie dodano mapowania nazw \texttt{*.adm} w pliku \texttt{/etc/hosts}.
+
+\begin{lstlisting}
+drapich@s3 ~ % sudo pacman -S --needed zerotier-one
+drapich@s3 ~ % zerotier -n 8d1c312afa9a3adc add .
+drapich@s3 ~ % sudo zerotier-cli listnetworks
+200 listnetworks 8d1c312afa9a3adc ADM ... OK ... 10.80.108.19/24
+drapich@s3 ~ % ping -c1 vps.adm
+64 bytes from 10.80.108.71: icmp_seq=1 ttl=64 time=18.2 ms
+drapich@s3 ~ % ping -c1 lap.adm
+64 bytes from 10.80.108.105: icmp_seq=1 ttl=64 time=22.1 ms
+\end{lstlisting}
+
+Połączenie publiczne (stacja s3 $\rightarrow$ VPS przez Internet):
+
+\begin{lstlisting}
+drapich@s3 ~ % ping -c1 vps
+64 bytes from vps (74.248.150.53): icmp_seq=1 ttl=46 time=12.7 ms
+drapich@s3 ~ % ssh vps hostname
+arch
+\end{lstlisting}
 
 \section{Konfiguracja serwisu WWW}
 
 \subsection{Nginx -- \texttt{config-www}}
 
-Wybrany serwis: WWW. Skrypt instaluje i uruchamia \texttt{nginx} na VPS.
-Port 80 otwarty w NSG \texttt{LabSK-NSG}.
+Wybrany serwis: WWW (nginx). Skrypt \texttt{config-www} instaluje pakiet
+\texttt{nginx} na serwerze VPS i włącza usługę w systemd.
+Port TCP 80 jest otwarty w grupie bezpieczeństwa \texttt{LabSK-NSG}
+(reguła \texttt{AllowHTTPInbound}). Serwer odpowiada domyślną stroną
+\textit{Welcome to nginx!} zarówno po publicznym adresie \texttt{vps},
+jak i po adresie ADM \texttt{vps.adm}.
 
 \begin{lstlisting}
-drapich@s2 ~ % config-www
+drapich@s3 ~ % config-www
 Created symlink ... nginx.service
-drapich@s2 ~ % ssh vps 'systemctl is-active nginx'
+drapich@s3 ~ % ssh vps 'systemctl is-active nginx'
 active
-drapich@s2 ~ % curl -I http://vps
+drapich@s3 ~ % curl -I http://vps
 HTTP/1.1 200 OK
 Server: nginx/1.30.2
-drapich@s2 ~ % curl http://vps | head -3
+drapich@s3 ~ % curl http://vps | head -3
 <!DOCTYPE html>
 <html>
 <head>
