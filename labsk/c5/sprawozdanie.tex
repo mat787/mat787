@@ -1,79 +1,123 @@
-\documentclass[11pt,a4paper]{article}
+\documentclass[a4paper,10pt]{article}
+\usepackage[T1]{polski}
 \usepackage[utf8]{inputenc}
-\usepackage[T1]{fontenc}
-\usepackage[polish]{babel}
-\usepackage{geometry}
-\usepackage{graphicx}
-\usepackage{svg}
-\usepackage{listings}
 \usepackage{xcolor}
-\geometry{margin=2cm}
-\lstset{
-  basicstyle=\ttfamily\footnotesize,
-  breaklines=true,
-  frame=single,
-  backgroundcolor=\color{gray!8},
-  aboveskip=2pt,belowskip=2pt
+\usepackage{titlesec}
+\usepackage{graphicx}
+\usepackage[inkscapeformat=pdf]{svg}
+\usepackage{minted}
+\usepackage{listings}
+\lstdefinestyle{custom}{
+    backgroundcolor=\color{white},
+    inputencoding=utf8,
+    extendedchars=\true,
+    commentstyle=\color{red},
+    keywordstyle=\color{blue},
+    breaklines=true,
+    basicstyle=\ttfamily\footnotesize,
+    tabsize=1,
+    escapechar='
 }
+\lstset{style=custom}
+\titlespacing*{\section}{0pt}{6pt}{3pt}
+\titlespacing*{\subsection}{0pt}{4pt}{2pt}
+\hoffset=-3.0cm
+\textwidth=18cm
+\evensidemargin=0pt
+\voffset=-3cm
+\textheight=27cm
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{\medskipamount}
+\raggedbottom
+\newcommand\BS{\char`\\}
+\newcommand\TY{\raise.17ex\hbox{$\scriptstyle\mathtt{\sim}$}}
+\usepackage{float}
 
-\title{LabSK\,/\,5: Konfiguracja serwera w chmurze}
-\author{drapich \quad grupa poniedziałek 9P}
-\date{2026-06-06}
+\author{Matylda Drapich}
+\title{Laboratorium sieci komputerowych\\ćw.5\\Konfiguracja serwera w chmurze}
+\frenchspacing
 
 \begin{document}
+\thispagestyle{empty}
 \maketitle
-\vspace{-1.2em}
 
-\section*{Cel ćwiczenia}
-Skryptowa konfiguracja serwera VPS w Azure (zsh, agent AI, ZeroTier/ADM)
-oraz instalacja wybranego serwisu WWW (nginx).
-Skrypty \texttt{gen-vps}, \texttt{config-vps}, \texttt{config-www} w katalogu \texttt{c5}.
+\section{Skryptowa konfiguracja serwera w chmurze}
 
-\section*{Schemat sieci ADM}
-\begin{center}
-\includesvg[width=0.92\linewidth]{ADM.svg}
-\end{center}
-\noindent{\small Stacja sX łączy się z VPS po publicznym IP (niebieska).
-Laptop i VPS są w sieci ZeroTier ADM (zielona). Plik: \texttt{ADM.drawio}.}
+\subsection{Generacja VPS -- \texttt{gen-vps}}
 
-\section*{Zadania i dowody wykonania}
+Skrypt tworzy maszynę Archlinux w Azure, zapisuje DNS w \texttt{\TY/.vps}
+i mapuje nazwę \texttt{vps} na publiczny adres IP w \texttt{/etc/hosts}.
 
-\textbf{1. Generacja VPS} --- skrypt \texttt{gen-vps} tworzy Archlinux w Azure, zapisuje DNS w \texttt{\textasciitilde/.vps}, mapuje \texttt{vps} w \texttt{/etc/hosts}.
 \begin{lstlisting}
-$ gen-vps
+drapich@s2 ~ % gen-vps
+ResourceGroup  PowerState   PublicIpAddress  Fqdns
+LabSK          VM running   74.248.150.53    drapich.polandcentral.cloudapp.azure.com
 74.248.150.53 vps
-$ cat ~/.vps
+drapich@s2 ~ % cat ~/.vps
 drapich.polandcentral.cloudapp.azure.com
+drapich@s2 ~ % grep vps /etc/hosts
+74.248.150.53 vps
 \end{lstlisting}
 
-\textbf{2. Konfiguracja VPS} --- \texttt{config-vps}: zsh, \texttt{~/bin/ipb}, gemini-cli, dołączenie do ADM.
+\subsection{Konfiguracja VPS -- \texttt{config-vps}}
+
+Skrypt instaluje \texttt{zsh}, agenta \texttt{gemini-cli}, tworzy \texttt{~/bin/ipb}
+oraz dołącza serwer do sieci ZeroTier ADM.
+
 \begin{lstlisting}
-$ config-vps
+drapich@s2 ~ % config-vps
 200 join OK
-$ ssh vps "ipb a"
-eth0 ... 10.0.0.4/24
-ztu7tkwebg ... 10.80.108.71/24
-$ ssh vps 'pacman -Q gemini-cli'
+drapich@s2 ~ % ssh vps "echo $SHELL"
+/usr/bin/zsh
+drapich@s2 ~ % ssh vps "ipb a"
+lo         UNKNOWN  127.0.0.1/8 ...
+eth0       UP       10.0.0.4/24 ...
+ztu7tkwebg UNKNOWN  10.80.108.71/24 ...
+drapich@s2 ~ % ssh vps 'pacman -Q gemini-cli'
 gemini-cli 1:0.45.2-1
 \end{lstlisting}
 
-\textbf{3. Sieć VPN/GAN (ZeroTier ADM)} --- VPS i laptop w sieci prywatnej; stacja sX po publicznym IP.
+\subsection{Sieć VPN/GAN -- ZeroTier ADM}
+
+Sieć prywatna ADM (\texttt{8d1c312afa9a3adc}, \texttt{10.80.108.0/24}).
+VPS i laptop w ADM; stacja sX łączy się z VPS po publicznym IP.
+
 \begin{lstlisting}
-$ ssh vps 'sudo zerotier-cli listnetworks'
-... ADM ... OK ... 10.80.108.71/24
-$ ping -c1 vps
-64 bytes from 74.248.150.53
-$ ping -c1 vps.adm    # MacBook
-64 bytes from 10.80.108.71
+drapich@s2 ~ % ssh vps 'sudo zerotier-cli listnetworks'
+200 listnetworks 8d1c312afa9a3adc ADM ... OK PRIVATE ztu7tkwebg 10.80.108.71/24
+drapich@s2 ~ % ping -c1 vps
+64 bytes from vps (74.248.150.53): icmp_seq=1 ttl=46 time=12.7 ms
+mat@mat ~ % ping -c1 vps.adm
+64 bytes from 10.80.108.71: icmp_seq=0 ttl=64 time=22.3 ms
+mat@mat ~ % ping -c1 lap.adm
+64 bytes from 10.80.108.105: icmp_seq=0 ttl=64 time=0.103 ms
 \end{lstlisting}
 
-\textbf{4. Serwis WWW (nginx)} --- \texttt{config-www} instaluje i uruchamia nginx.
+\begin{figure}[H]
+  \centering
+  \includesvg[width=0.55\textwidth]{ADM.svg}
+  \caption{Schemat sieci ADM}
+\end{figure}
+
+\section{Konfiguracja serwisu WWW}
+
+\subsection{Nginx -- \texttt{config-www}}
+
+Wybrany serwis: WWW. Skrypt instaluje i uruchamia \texttt{nginx} na VPS.
+Port 80 otwarty w NSG \texttt{LabSK-NSG}.
+
 \begin{lstlisting}
-$ curl -I http://vps
+drapich@s2 ~ % config-www
+Created symlink ... nginx.service
+drapich@s2 ~ % ssh vps 'systemctl is-active nginx'
+active
+drapich@s2 ~ % curl -I http://vps
 HTTP/1.1 200 OK
 Server: nginx/1.30.2
-$ curl http://vps | head -1
+drapich@s2 ~ % curl http://vps | head -3
 <!DOCTYPE html>
+<html>
+<head>
 \end{lstlisting}
 
 \end{document}
