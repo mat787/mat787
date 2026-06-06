@@ -1,76 +1,94 @@
-<mxfile host="app.diagrams.net" modified="2026-06-06T22:00:00.000Z" agent="LabSK-c5" version="22.1.0">
-  <diagram id="ADM" name="ADM">
-    <mxGraphModel dx="1000" dy="650" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="480" math="0" shadow="0">
+<mxfile host="app.diagrams.net" modified="2026-06-06T23:00:00.000Z" agent="LabSK" version="22.1.0" type="device">
+  <diagram id="ADM-c5" name="ADM">
+    <mxGraphModel dx="1100" dy="700" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="0" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="500" math="0" shadow="0">
       <root>
         <mxCell id="0"/>
         <mxCell id="1" parent="0"/>
 
-        <!-- chmury -->
-        <mxCell id="inet" value="Internet" style="ellipse;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontStyle=1" vertex="1" parent="1">
-          <mxGeometry x="320" y="30" width="160" height="70" as="geometry"/>
-        </mxCell>
-        <mxCell id="adm" value="VPN/GAN&#xa;ZeroTier / ADM&#xa;10.80.108.0 / 24&#xa;NetID: 8d1c312afa9a3adc" style="ellipse;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontStyle=0;fontSize=11" vertex="1" parent="1">
-          <mxGeometry x="300" y="280" width="200" height="100" as="geometry"/>
+        <!-- Internet -->
+        <mxCell id="cloud_inet" value="Internet" style="ellipse;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontStyle=1;fontSize=14;" vertex="1" parent="1">
+          <mxGeometry x="330" y="40" width="180" height="70" as="geometry"/>
         </mxCell>
 
-        <!-- węzły -->
-        <mxCell id="sx" value="sX&#xa;(stacja s2)" style="ellipse;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#333333;" vertex="1" parent="1">
-          <mxGeometry x="60" y="110" width="90" height="90" as="geometry"/>
-        </mxCell>
-        <mxCell id="lap" value="Lap&#xa;(MacBook)" style="ellipse;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#333333;" vertex="1" parent="1">
-          <mxGeometry x="60" y="300" width="90" height="90" as="geometry"/>
-        </mxCell>
-        <mxCell id="vps" value="VPS&#xa;(Azure Arch)" style="ellipse;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#333333;" vertex="1" parent="1">
-          <mxGeometry x="620" y="170" width="90" height="90" as="geometry"/>
+        <!-- ADM / ZeroTier -->
+        <mxCell id="cloud_adm" value="VPN/GAN&#xa;ZeroTier / ADM&#xa;10.80.108.0 / 24" style="ellipse;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="310" y="300" width="220" height="90" as="geometry"/>
         </mxCell>
 
-        <!-- niebieskie kropki -->
+        <!-- sX -->
+        <mxCell id="node_sx" value="sX" style="ellipse;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;fontStyle=1;fontSize=14;" vertex="1" parent="1">
+          <mxGeometry x="80" y="130" width="80" height="80" as="geometry"/>
+        </mxCell>
+        <mxCell id="lbl_sx" value="stacja s2" style="text;html=1;strokeColor=none;fillColor=none;align=center;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="70" y="215" width="100" height="20" as="geometry"/>
+        </mxCell>
+
+        <!-- Lap -->
+        <mxCell id="node_lap" value="Lap" style="ellipse;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;fontStyle=1;fontSize=14;" vertex="1" parent="1">
+          <mxGeometry x="80" y="320" width="80" height="80" as="geometry"/>
+        </mxCell>
+        <mxCell id="lbl_lap" value="MacBook" style="text;html=1;strokeColor=none;fillColor=none;align=center;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="70" y="405" width="100" height="20" as="geometry"/>
+        </mxCell>
+        <mxCell id="ip_lap" value=".IP = lap.adm&#xa;10.80.108.105" style="text;html=1;strokeColor=none;fillColor=none;align=left;fontFamily=Courier New;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="170" y="400" width="130" height="35" as="geometry"/>
+        </mxCell>
+
+        <!-- VPS -->
+        <mxCell id="node_vps" value="VPS" style="ellipse;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;fontStyle=1;fontSize=14;" vertex="1" parent="1">
+          <mxGeometry x="680" y="190" width="80" height="80" as="geometry"/>
+        </mxCell>
+        <mxCell id="lbl_vps" value="Azure Arch" style="text;html=1;strokeColor=none;fillColor=none;align=center;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="665" y="275" width="110" height="20" as="geometry"/>
+        </mxCell>
+        <mxCell id="ip_vps_adm" value=".IP = vps.adm&#xa;10.80.108.71" style="text;html=1;strokeColor=none;fillColor=none;align=left;fontFamily=Courier New;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="540" y="310" width="130" height="35" as="geometry"/>
+        </mxCell>
+        <mxCell id="ip_vps_eth" value="eth0: 10.0.0.4/24" style="text;html=1;strokeColor=none;fillColor=none;align=center;fontSize=10;fontColor=#666666;" vertex="1" parent="1">
+          <mxGeometry x="660" y="295" width="120" height="20" as="geometry"/>
+        </mxCell>
+
+        <!-- IP publiczny (pod chmurą Internet) -->
+        <mxCell id="ip_vps_pub" value=".IP = vps&#xa;74.248.150.53&#xa;drapich.polandcentral.cloudapp.azure.com" style="text;html=1;strokeColor=none;fillColor=none;align=center;fontFamily=Courier New;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="290" y="115" width="260" height="50" as="geometry"/>
+        </mxCell>
+
+        <!-- NetID -->
+        <mxCell id="netid" value="NetID: 8d1c312afa9a3adc" style="text;html=1;strokeColor=none;fillColor=none;align=center;fontFamily=Courier New;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="330" y="395" width="180" height="20" as="geometry"/>
+        </mxCell>
+
+        <!-- niebieska: sX -> Internet -->
+        <mxCell id="e_sx_inet" style="endArrow=none;html=1;strokeColor=#6c8ebf;strokeWidth=2;edgeStyle=orthogonalEdgeStyle;" edge="1" parent="1" source="node_sx" target="cloud_inet">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <!-- niebieska: Internet -> VPS -->
+        <mxCell id="e_inet_vps" style="endArrow=none;html=1;strokeColor=#6c8ebf;strokeWidth=2;edgeStyle=orthogonalEdgeStyle;" edge="1" parent="1" source="cloud_inet" target="node_vps">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <!-- zielona: Lap -> ADM -->
+        <mxCell id="e_lap_adm" style="endArrow=none;html=1;strokeColor=#82b366;strokeWidth=2;edgeStyle=orthogonalEdgeStyle;" edge="1" parent="1" source="node_lap" target="cloud_adm">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <!-- zielona: ADM -> VPS -->
+        <mxCell id="e_adm_vps" style="endArrow=none;html=1;strokeColor=#82b366;strokeWidth=2;edgeStyle=orthogonalEdgeStyle;" edge="1" parent="1" source="cloud_adm" target="node_vps">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- kropki niebieskie -->
         <mxCell id="dot_sx_b" value="" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#6c8ebf;strokeColor=#6c8ebf;" vertex="1" parent="1">
-          <mxGeometry x="135" y="135" width="14" height="14" as="geometry"/>
+          <mxGeometry x="155" y="155" width="12" height="12" as="geometry"/>
         </mxCell>
         <mxCell id="dot_vps_b" value="" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#6c8ebf;strokeColor=#6c8ebf;" vertex="1" parent="1">
-          <mxGeometry x="620" y="195" width="14" height="14" as="geometry"/>
+          <mxGeometry x="675" y="205" width="12" height="12" as="geometry"/>
         </mxCell>
 
-        <!-- zielone kropki -->
+        <!-- kropki zielone -->
         <mxCell id="dot_lap_g" value="" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#82b366;strokeColor=#82b366;" vertex="1" parent="1">
-          <mxGeometry x="135" y="355" width="14" height="14" as="geometry"/>
+          <mxGeometry x="155" y="355" width="12" height="12" as="geometry"/>
         </mxCell>
         <mxCell id="dot_vps_g" value="" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#82b366;strokeColor=#82b366;" vertex="1" parent="1">
-          <mxGeometry x="680" y="245" width="14" height="14" as="geometry"/>
-        </mxCell>
-
-        <!-- połączenia niebieskie -->
-        <mxCell id="b1" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#6c8ebf;strokeWidth=2;endArrow=none;" edge="1" parent="1" source="sx" target="inet">
-          <mxGeometry relative="1" as="geometry"/>
-        </mxCell>
-        <mxCell id="b2" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#6c8ebf;strokeWidth=2;endArrow=none;" edge="1" parent="1" source="inet" target="vps">
-          <mxGeometry relative="1" as="geometry"/>
-        </mxCell>
-
-        <!-- połączenia zielone -->
-        <mxCell id="g1" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#82b366;strokeWidth=2;endArrow=none;" edge="1" parent="1" source="lap" target="adm">
-          <mxGeometry relative="1" as="geometry"/>
-        </mxCell>
-        <mxCell id="g2" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#82b366;strokeWidth=2;endArrow=none;" edge="1" parent="1" source="adm" target="vps">
-          <mxGeometry relative="1" as="geometry"/>
-        </mxCell>
-
-        <!-- etykiety IP (Twoje dane z logów) -->
-        <mxCell id="lbl_vps" value=".IP = vps&#xa;74.248.150.53&#xa;drapich.polandcentral.cloudapp.azure.com" style="text;html=1;strokeColor=none;fillColor=none;align=center;fontFamily=Courier New;fontSize=11;" vertex="1" parent="1">
-          <mxGeometry x="330" y="105" width="280" height="50" as="geometry"/>
-        </mxCell>
-        <mxCell id="lbl_vps_adm" value=".IP = vps.adm&#xa;10.80.108.71&#xa;(ztu7tkwebg)" style="text;html=1;strokeColor=none;fillColor=none;align=center;fontFamily=Courier New;fontSize=11;" vertex="1" parent="1">
-          <mxGeometry x="500" y="300" width="140" height="50" as="geometry"/>
-        </mxCell>
-        <mxCell id="lbl_lap_adm" value=".IP = lap.adm&#xa;10.80.108.105" style="text;html=1;strokeColor=none;fillColor=none;align=center;fontFamily=Courier New;fontSize=11;" vertex="1" parent="1">
-          <mxGeometry x="155" y="380" width="130" height="40" as="geometry"/>
-        </mxCell>
-        <mxCell id="lbl_sx" value="ssh / ping vps&#xa;(tylko Internet)" style="text;html=1;strokeColor=none;fillColor=none;align=left;fontSize=10;fontColor=#666666;" vertex="1" parent="1">
-          <mxGeometry x="155" y="120" width="130" height="40" as="geometry"/>
-        </mxCell>
-        <mxCell id="lbl_vps_priv" value="eth0: 10.0.0.4/24" style="text;html=1;strokeColor=none;fillColor=none;align=center;fontSize=10;fontColor=#666666;" vertex="1" parent="1">
-          <mxGeometry x="610" y="265" width="110" height="20" as="geometry"/>
+          <mxGeometry x="665" y="255" width="12" height="12" as="geometry"/>
         </mxCell>
 
       </root>
