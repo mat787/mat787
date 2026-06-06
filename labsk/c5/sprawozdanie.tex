@@ -1,0 +1,168 @@
+\documentclass[a4paper,10pt]{article}
+\usepackage[T1]{polski}
+\usepackage[utf8]{inputenc}
+\usepackage{xcolor}
+\usepackage{titlesec}
+\usepackage{graphicx}
+\usepackage[inkscapeformat=pdf]{svg}
+\usepackage{minted}
+\usepackage{listings}
+\lstdefinestyle{custom}{
+    backgroundcolor=\color{white},
+    inputencoding=utf8,
+    extendedchars=\true,
+    commentstyle=\color{red},
+    keywordstyle=\color{blue},
+    breaklines=true,
+    basicstyle=\ttfamily\footnotesize,
+    tabsize=1,
+    escapechar='
+}
+\lstset{style=custom}
+\titlespacing*{\section}{0pt}{6pt}{3pt}
+\titlespacing*{\subsection}{0pt}{4pt}{2pt}
+\hoffset=-3.0cm
+\textwidth=18cm
+\evensidemargin=0pt
+\voffset=-3cm
+\textheight=27cm
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{\medskipamount}
+\raggedbottom
+\newcommand\BS{\char`\\}
+\newcommand\TY{\raise.17ex\hbox{$\scriptstyle\mathtt{\sim}$}}
+\usepackage{float}
+
+\author{Matylda Drapich}
+\title{Laboratorium sieci komputerowych\\ćw.5\\Konfiguracja serwera w chmurze}
+\frenchspacing
+
+\begin{document}
+\thispagestyle{empty}
+\maketitle
+
+\vspace{-0.5em}
+Celem ćwiczenia była skryptowa konfiguracja serwera VPS w chmurze Azure
+oraz podłączenie urządzeń do prywatnej sieci ZeroTier ADM.
+Przygotowano trzy skrypty w \texttt{/bin/sh}: \texttt{gen-vps}, \texttt{config-vps}
+oraz \texttt{config-www}.
+
+\section{Skryptowa konfiguracja serwera w chmurze}
+
+\subsection{Generacja VPS -- \texttt{gen-vps}}
+
+Skrypt \texttt{gen-vps} rejestruje zasoby Azure (\texttt{az/register}, \texttt{az/nsg -a}),
+tworzy maszynę wirtualną Archlinux (\texttt{az/archlinux -k}, \texttt{az/archlinux -s})
+w regionie PolandCentral i konfiguruje mapowanie nazw na stacji roboczej.
+Adres DNS serwera trafia do pliku \texttt{\TY/.vps}, a nazwa \texttt{vps} jest dopisywana
+do \texttt{/etc/hosts} na podstawie publicznego adresu IP z Azure.
+
+\begin{lstlisting}
+#!/bin/sh
+/pub/Linux/zetis/bin/az/register; /pub/Linux/zetis/bin/az/nsg -a
+/pub/Linux/zetis/bin/az/archlinux -k; /pub/Linux/zetis/bin/az/archlinux -s
+DNS=$USER.polandcentral.cloudapp.azure.com
+echo $DNS >~/.vps
+IP=$(az network public-ip show -n $USER --query ipAddress -o tsv)
+sudo sed -i '/ vps$/d' /etc/hosts
+echo "$IP vps" | sudo tee -a /etc/hosts
+\end{lstlisting}
+
+\subsection{Konfiguracja VPS -- \texttt{config-vps}}
+
+Skrypt \texttt{config-vps} łączy się z serwerem przez SSH i instaluje
+wymagane oprogramowanie: powłokę \texttt{zsh}, agenta AI \texttt{gemini-cli}
+oraz klienta \texttt{zerotier-one}. Tworzy katalog \texttt{~/bin} z programem
+\texttt{ipb} (skrót do \texttt{ip -br}) i dołącza VPS do sieci ADM
+(NetID \texttt{8d1c312afa9a3adc}).
+
+\begin{lstlisting}
+#!/bin/sh
+ssh -T vps <<'E'
+sudo pacman -S --needed --noconfirm zsh zerotier-one gemini-cli
+sudo systemctl enable --now zerotier-one.service
+sudo usermod -s /usr/bin/zsh $USER
+mkdir -p ~/bin
+printf 'ip -br $*\n' >~/bin/ipb && chmod +x ~/bin/ipb
+echo 'export PATH="$HOME/bin:$PATH"' >>~/.zshenv
+sudo zerotier-cli join 8d1c312afa9a3adc
+E
+\end{lstlisting}
+
+\subsection{Weryfikacja połączeń}
+
+Po uruchomieniu \texttt{gen-vps} i \texttt{config-vps} sprawdzono łączność
+w dwóch warstwach: publiczną (stacja $\rightarrow$ VPS przez Internet)
+oraz prywatną (stacja $\rightarrow$ ADM przez ZeroTier).
+
+Po \texttt{gen-vps} weryfikacja obejmuje mapowanie nazwy \texttt{vps}
+w \texttt{/etc/hosts}, ping na publiczny adres oraz logowanie \texttt{ssh vps}.
+Po \texttt{config-vps} -- dostęp SSH do VPS, działanie powłoki \texttt{zsh},
+programu \texttt{ipb} oraz dołączenie serwera do sieci ADM
+(\texttt{zerotier-cli listnetworks} na VPS).
+
+Na stacji uczelnianiej do sieci ADM służy polecenie
+\texttt{zerotier -n 8d1c312afa9a3adc add .}
+(wrapper \texttt{/usr/local/zetis/bin/zerotier}), poprzedzone instalacją
+\texttt{sudo pacman -S --needed zerotier-one}.
+
+Próba dołączenia stacji \textbf{s2} do ADM \textbf{przed} instalacją pakietu
+\texttt{zerotier-one} zakończyła się błędem:
+
+\begin{lstlisting}
+drapich@s2 ~ % zerotier -n 8d1c312afa9a3adc add .
+rejestracja . w sieci  (8d1c312afa9a3adc) ...
+sudo: zerotier-cli: nie znaleziono polecenia
+/usr/local/zetis/bin/zerotier: linia 52: [: 2: oczekiwano operatora jednoargumentowego
+błędny adres:  10
+\end{lstlisting}
+
+Komunikat \texttt{sudo: zerotier-cli: nie znaleziono polecenia} wskazuje,
+że wrapper volty nie znalazł klienta ZeroTier w systemie.
+Pozostałe błędy skryptu (\texttt{linia 52}, \texttt{błędny adres: 10})
+są skutkiem ubocznym -- skrypt nie otrzymał poprawnej odpowiedzi
+z \texttt{zerotier-cli}.
+
+\textit{Po instalacji \texttt{zerotier-one}, autoryzacji węzła w panelu ZeroTier
+oraz dodaniu mapowań \texttt{*.adm} w \texttt{/etc/hosts} należy uzupełnić
+tę sekcję outputem \texttt{listnetworks} oraz pingów \texttt{vps.adm}
+i \texttt{lap.adm}. Analogicznie -- logi \texttt{ping vps} i \texttt{ssh vps}
+po \texttt{gen-vps}/\texttt{config-vps}, jeśli zostaną wykonane ponownie.}
+
+\subsection{Sieć VPN/GAN -- ZeroTier ADM}
+
+Sieć prywatna ADM została utworzona w panelu ZeroTier
+(\texttt{my.zerotier.com}). Parametry sieci: NetID \texttt{8d1c312afa9a3adc},
+zakres adresów \texttt{10.80.108.0/24}. Planowane urządzenia w sieci:
+serwer VPS (\texttt{vps.adm}), laptop (\texttt{lap.adm}) oraz stacja uczelniana
+(\texttt{sx.adm}). Adresy przypisane w panelu (Managed IPs) i autoryzacja
+węzłów (Auth) wymagają potwierdzenia testami ping.
+
+\begin{figure}[H]
+  \centering
+  \includesvg[width=0.58\textwidth]{ADM.svg}
+  \caption{Planowany schemat sieci ADM}
+\end{figure}
+
+
+\section{Konfiguracja serwisu WWW}
+
+\subsection{Nginx -- \texttt{config-www}}
+
+Wybrany serwis: WWW (nginx). Skrypt \texttt{config-www} instaluje pakiet
+\texttt{nginx} na serwerze VPS i włącza usługę w systemd.
+Port TCP 80 powinien być otwarty w grupie bezpieczeństwa \texttt{LabSK-NSG}
+(reguła \texttt{AllowHTTPInbound}).
+
+\begin{lstlisting}
+#!/bin/sh
+ssh -T vps <<'E'
+sudo pacman -S --needed --noconfirm nginx
+sudo systemctl enable --now nginx.service
+E
+\end{lstlisting}
+
+\textit{Wynik uruchomienia \texttt{config-www} oraz weryfikacja
+(\texttt{systemctl is-active nginx}, \texttt{curl -I http://vps}) -- do uzupełnienia.}
+
+\end{document}

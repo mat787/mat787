@@ -1,0 +1,5 @@
+#!/bin/sh
+ssh -T vps <<'E'
+sudo pacman -S --needed --noconfirm nginx
+sudo systemctl enable --now nginx.service
+E

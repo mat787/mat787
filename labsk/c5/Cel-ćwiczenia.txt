@@ -1,0 +1,13 @@
+LabSK c5 "Konfiguracja serwera w chmurze lub własnego lokalnego"
+
+Cele ćwiczenia:
+
+1. Skryptowa konfiguracja serwera w chmurze:
+   - instalacja i konfiguracja oprogramowania: zsh, agent AI
+   - instalacja VPN/GAN : Zerotier, Tailsacale lub Open-VPN;
+     kreacja sieci prywatnej i podpięcie do niej maszyny prywatnej i stacji sX
+
+2. Konfiguracja wybranego serwisu na serwerze w chmurze lub wirtualnym
+   - www : dowoly: nginx, apache2, ....
+   - SMB :
+   - NFS :

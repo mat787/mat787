@@ -1,0 +1,8 @@
+#!/bin/sh
+/pub/Linux/zetis/bin/az/register; /pub/Linux/zetis/bin/az/nsg -a
+/pub/Linux/zetis/bin/az/archlinux -k; /pub/Linux/zetis/bin/az/archlinux -s
+DNS=$USER.polandcentral.cloudapp.azure.com
+echo $DNS >~/.vps
+IP=$(az network public-ip show -n $USER --query ipAddress -o tsv)
+sudo sed -i '/ vps$/d' /etc/hosts
+echo "$IP vps" | sudo tee -a /etc/hosts

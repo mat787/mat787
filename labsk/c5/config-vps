@@ -1,0 +1,10 @@
+#!/bin/sh
+ssh -T vps <<'E'
+sudo pacman -S --needed --noconfirm zsh zerotier-one gemini-cli
+sudo systemctl enable --now zerotier-one.service
+sudo usermod -s /usr/bin/zsh $USER
+mkdir -p ~/bin
+printf 'ip -br $*\n' >~/bin/ipb && chmod +x ~/bin/ipb
+echo 'export PATH="$HOME/bin:$PATH"' >>~/.zshenv
+sudo zerotier-cli join 8d1c312afa9a3adc
+E
