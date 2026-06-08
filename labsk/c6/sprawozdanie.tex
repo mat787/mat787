@@ -59,12 +59,28 @@ Grupa \texttt{LabSK-NSG} tworzona jest przez \texttt{gen-vps}
 
 \textit{TODO: wkleić z \texttt{gen-vps} linie \texttt{Dodanie reguły Allow...}.}
 
-\subsection{Laptop (macOS) -- udostępnienie SMB}
+\subsection{Windows -- reguły zapory (PowerShell)}
 
-Katalog \texttt{\TY/vps} udostępniono z MacBooka (\texttt{10.80.108.105})
-pod użytkownikiem \texttt{mat}. Montaż na VPS: \texttt{//10.80.108.105/vps}.
+W PowerShell (administrator) dodano reguły przepuszczające SMB (TCP 445)
+w profilu \texttt{Private} oraz włączono grupy \texttt{File And Printer Sharing}
+i \texttt{Network Discovery}.
 
-\textit{TODO (Windows): jeśli wymagane --- \texttt{Edit-smb.ps1} lub zrzut zapory Windows.}
+\begin{lstlisting}
+PS C:\Users\Matylda> New-NetFirewallRule -DisplayName "LabSK SMB In" ...
+PS C:\Users\Matylda> New-NetFirewallRule -DisplayName "LabSK SMB Out" ...
+PS C:\Users\Matylda> Enable-NetFirewallRule -DisplayGroup "File And Printer Sharing"
+PS C:\Users\Matylda> Enable-NetFirewallRule -DisplayGroup "Network Discovery"
+PS C:\Users\Matylda> Get-NetFirewallRule -DisplayName "LabSK SMB*" | Format-Table ...
+
+DisplayName   Enabled Direction Action
+LabSK SMB In     True   Inbound  Allow
+LabSK SMB Out    True  Outbound  Allow
+\end{lstlisting}
+
+\subsection{Udostępnienie SMB (macOS / montaż na VPS)}
+
+Katalog \texttt{\TY/vps} udostępniono z laptopa (\texttt{10.80.108.105},
+użytkownik \texttt{mat}). Montaż na VPS: \texttt{//10.80.108.105/vps}.
 
 \section{Podłączenie VPS do sieci ZeroTier ADM}
 
@@ -123,6 +139,7 @@ drapich@c2 ~ % ssh $vps "which mount-smb"
 \section{Podsumowanie}
 
 \begin{itemize}
+\item Zapora Windows: reguły \texttt{LabSK SMB In/Out} (PowerShell, TCP 445).
 \item Zapora Unix: \texttt{gen-fw} (UFW) --- \textit{brak logu wykonania}.
 \item ZeroTier ADM: VPS \texttt{10.80.108.10/24} na \texttt{ztu7tkwebg}.
 \item Docker + WWW: \texttt{gen-kont} $\rightarrow$ dwa razy \texttt{HTTP/1.1 200 OK}.
@@ -137,7 +154,6 @@ drapich@c2 ~ % ssh $vps "which mount-smb"
 \item \textbf{ZeroTier} --- \texttt{zerotier-cli listnetworks} (status \texttt{OK}).
 \item \textbf{Docker} --- \texttt{ssh \$vps "sudo docker ps"}.
 \item \textbf{Schemat ADM.svg} --- poprawić IP VPS na \texttt{.10}.
-\item \textbf{Windows} --- opcjonalnie zapora/Edit-smb, jeśli prowadzący wymaga obu systemów.
 \item \textbf{Ping ADM} --- \texttt{ping vps.adm} z c2 lub MacBooka (jeśli \texttt{/etc/hosts}).
 \end{enumerate}
 
