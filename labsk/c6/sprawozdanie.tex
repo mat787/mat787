@@ -38,152 +38,107 @@
 \maketitle
 
 \vspace{-0.5em}
-Celem ćwiczenia była konfiguracja zapory sieciowej (Windows/Unix),
-podłączenie serwera VPS w chmurze Azure do sieci ZeroTier ADM,
-uruchomienie kontenera OCI (Docker) z usługą WWW oraz montaż
-udziału SMB z laptopa. Pracę wykonano na stacji \texttt{c2};
-rekwizytem był dostęp do serwera w chmurze przez sieć ADM
-(\texttt{ssh \$srv}).
+Celem ćwiczenia była konfiguracja zapory (Windows/Unix), podłączenie VPS
+w Azure do sieci ZeroTier ADM, uruchomienie kontenera Docker z usługą WWW
+oraz montaż udziału SMB z laptopa. Pracę wykonano na stacji \texttt{c2}.
 
 \section{Konfiguracja zapory internetowej}
 
-\subsection{Unix -- Azure NSG (\texttt{LabSK-NSG})}
+\subsection{Unix -- UFW na VPS (\texttt{gen-fw})}
 
-Skrypt \texttt{gen-vps} tworzy grupę bezpieczeństwa sieci w Azure
-(\texttt{az/nsg -a}). Reguły NSG przepuszczają m.in.: SSH (22/TCP),
-ICMP, ZeroTier (9993/UDP), HTTP (80/TCP) i HTTPS (443/TCP).
+Skrypt \texttt{gen-fw} konfiguruje na VPS zaporę \texttt{ufw}: domyślnie
+blokuje ruch przychodzący, przepuszcza ZeroTier (UDP 9993) i SSH z interfejsu ZT.
 
-\textit{TODO: wkleić output \texttt{gen-vps} z fragmentem tworzenia NSG
-(linie \texttt{Dodanie reguły AllowSSHInbound} itd.).}
+\textit{TODO: wkleić wynik \texttt{bin/gen-fw} oraz
+\texttt{ssh \$vps "sudo ufw status verbose"}.}
 
-\subsection{Windows / laptop -- udostępnienie SMB}
+\subsection{Unix -- Azure NSG}
 
-Na laptopie (macOS) utworzono katalog \texttt{\TY/vps} i włączono
-udostępnianie plików (File Sharing) w celu eksportu katalogu dla VPS.
-Na systemie Windows analogiczna konfiguracja wykonywana jest skryptem
-\texttt{labsk/bin/Edit-smb.ps1} dla katalogu \texttt{c:\textbackslash vps}.
+Grupa \texttt{LabSK-NSG} tworzona jest przez \texttt{gen-vps}
+(\texttt{az/nsg -a}): SSH, ICMP, ZeroTier, HTTP/HTTPS.
 
-\textit{TODO: zrzut ekranu lub opis włączenia File Sharing na Macu
-/ wynik \texttt{Edit-smb.ps1} na Windows.}
+\textit{TODO: wkleić z \texttt{gen-vps} linie \texttt{Dodanie reguły Allow...}.}
 
-\section{Podłączenie serwera w chmurze do sieci ZeroTier ADM}
+\subsection{Laptop (macOS) -- udostępnienie SMB}
 
-\subsection{Generacja VPS -- \texttt{gen-vps}}
+Katalog \texttt{\TY/vps} udostępniono z MacBooka (\texttt{10.80.108.105})
+pod użytkownikiem \texttt{mat}. Montaż na VPS: \texttt{//10.80.108.105/vps}.
 
-Skrypt \texttt{gen-vps} rejestruje zasoby Azure, tworzy VM Archlinux,
-zapisuje DNS serwera w \texttt{\TY/.vps} (polecenie \texttt{ssh \$(cat \TY/.vps)}),
-ustawia zmienną \texttt{\$vps} w \texttt{\TY/.zshrc.local}
-(polecenie \texttt{ssh \$vps}) oraz wpis \texttt{Host vps} w
-\texttt{\TY/.ssh/config}. Po starcie VM dołącza serwer do sieci ADM.
+\textit{TODO (Windows): jeśli wymagane --- \texttt{Edit-smb.ps1} lub zrzut zapory Windows.}
 
-\begin{lstlisting}
-#!/bin/sh
-test -f ~/.ssh/id_ed25519.pub || ssh-keygen -t ed25519 -f ~/.ssh/id_ed25519 -N ""
-/pub/Linux/zetis/bin/az/register; /pub/Linux/zetis/bin/az/nsg -a
-/pub/Linux/zetis/bin/az/archlinux -k; /pub/Linux/zetis/bin/az/archlinux -s
-echo $USER.polandcentral.cloudapp.azure.com >~/.vps
-echo 'vps=$(cat ~/.vps); export vps' >~/.zshrc.local
-# ... ~/.ssh/config ...
-ssh $(cat ~/.vps) <<'E'
-sudo pacman -S --needed --noconfirm zerotier-one
-sudo zerotier-cli join 8d1c312afa9a3adc
-E
-\end{lstlisting}
+\section{Podłączenie VPS do sieci ZeroTier ADM}
 
-\textit{TODO: wkleić logi: \texttt{gen-vps}, \texttt{cat \TY/.vps},
-\texttt{ssh \$(cat \TY/.vps) hostname}, \texttt{ssh \$vps hostname}.}
+Sieć ADM: NetID \texttt{8d1c312afa9a3adc}, zakres \texttt{10.80.108.0/24}.
+VPS otrzymał adres \texttt{10.80.108.10}, laptop \texttt{10.80.108.105}.
 
-\subsection{Konfiguracja VPS -- \texttt{config-vps}}
-
-Skrypt \texttt{config-vps} instaluje na VPS m.in.\ \texttt{zsh},
-\texttt{zerotier-one}, \texttt{gemini-cli} oraz tworzy narzędzie \texttt{ipb}.
+\subsection{Logowanie i interfejs ZT}
 
 \begin{lstlisting}
-#!/bin/sh
-sleep 15
-ssh -T vps <<'E'
-sudo pacman -Syy --noconfirm
-sudo pacman -S --needed --noconfirm zsh zerotier-one gemini-cli
-sudo systemctl enable --now zerotier-one.service
-sudo usermod -s /usr/bin/zsh $USER
-sudo zerotier-cli join 8d1c312afa9a3adc
-E
+drapich@c2 ~ % ssh $vps
+arch%
+drapich@c2 ~ % ssh $vps ipb a
+ztu7tkwebg UNKNOWN 10.80.108.10/24 ...
+docker0      UP     172.17.0.1/16 ...
 \end{lstlisting}
 
-\textit{TODO: wkleić \texttt{config-vps}, \texttt{ssh vps "ipb a"} z interfejsem
-\texttt{10.80.108.x/24}, \texttt{listnetworks OK}.}
-
-\subsection{Sieć ADM -- parametry i schemat}
-
-Sieć ZeroTier ADM: NetID \texttt{8d1c312afa9a3adc},
-zakres \texttt{10.80.108.0/24}. Urządzenia: VPS (\texttt{vps.adm}),
-laptop (\texttt{lap.adm}), stacja uczelniana (\texttt{s3} / \texttt{c2}).
+\textit{TODO: \texttt{cat \TY/.vps}, \texttt{ssh \$(cat \TY/.vps) hostname},
+\texttt{ssh \$vps "sudo zerotier-cli listnetworks"}.}
 
 \begin{figure}[H]
   \centering
   \includesvg[width=0.58\textwidth]{ADM.svg}
-  \caption{Schemat sieci ADM}
+  \caption{Schemat sieci ADM (VPS \texttt{.10}, laptop \texttt{.105})}
 \end{figure}
 
-\textit{TODO: ping \texttt{vps.adm} / \texttt{lap.adm} z MacBooka lub c2.}
+\textit{TODO: zaktualizować rysunek ADM --- adres VPS to \texttt{.10}, nie \texttt{.71}.}
 
-\section{Kontener OCI (Docker) i usługa WWW}
+\section{Kontener Docker i usługa WWW (\texttt{gen-kont})}
 
-\subsection{Skrypt \texttt{gen-kont}}
-
-Skrypt \texttt{gen-kont} (na stacji \texttt{c2}) zdalnie instaluje Docker
-na VPS, uruchamia kontener \texttt{nginx} z mapowaniem portu
-\texttt{8080:80} i weryfikuje dostęp publicznie oraz przez ADM.
+Kontener \texttt{web} (nginx) uruchomiono na VPS. Dostęp zweryfikowano
+publicznie (\texttt{\$vps}) i przez sieć ADM.
 
 \begin{lstlisting}
-#!/bin/sh
-. ~/.zshrc.local
-ssh $vps <<'E'
-sudo pacman -S --needed --noconfirm docker
-sudo systemctl enable --now docker
-sudo docker run -d --name web -p 8080:80 nginx
-E
-curl -sI http://$vps:8080 | head -1
-curl -sI http://vps.adm:8080 | head -1
+drapich@c2 ~ % gen-kont
+web
+512d659b0b9a81db94921866d1655969484d648f9e46cbe6636bffd998877bec
+HTTP/1.1 200 OK
+HTTP/1.1 200 OK
+drapich@c2 ~ % curl http://$vps
+<h1>Welcome to nginx!</h1>
 \end{lstlisting}
 
-\textit{TODO: wkleić wynik \texttt{gen-kont} --- dwa wiersze
-\texttt{HTTP/1.1 200 OK} (adres publiczny i \texttt{vps.adm}).}
+\textit{TODO: \texttt{ssh \$vps "sudo docker ps"} --- potwierdzenie kontenera \texttt{web}.}
 
-\subsection{Konfiguracja sieci kontenera}
+\section{Usługa SMB (\texttt{mount-smb})}
 
-Kontener nasłuchuje na porcie \texttt{8080} hosta VPS; ruch jest
-kierowany przez reguły NSG (TCP 8080 --- \textit{TODO: jeśli wymagane,
-dodać regułę lub użyć portu 80}) oraz przez interfejs ZeroTier
-(\texttt{vps.adm:8080}).
-
-\textit{TODO: \texttt{ssh vps "sudo docker ps"} oraz
-\texttt{curl -I http://vps.adm:8080}.}
-
-\section{Usługa SMB -- \texttt{mount-smb}}
-
-Na laptopie udostępniono katalog \texttt{\TY/vps}. Na serwerze VPS
-skrypt \texttt{mount-smb} montuje udział \texttt{//lap.adm/vps}
-w katalogu \texttt{\TY/vps}.
+Udział SMB zamontowano na VPS w \texttt{\TY/vps}; widoczne pliki z laptopa.
 
 \begin{lstlisting}
-#!/bin/sh
-d=~/vps; mkdir -p $d
-sudo pacman -S --needed --noconfirm cifs-utils
-sudo mount -t cifs //lap.adm/vps $d -o user=$SMB_USER,pass=$SMB_PASS,uid=$(id -u),vers=3.0
-ls $d
+drapich@c2 ~ % ssh $vps ls vps
+plik.txt  test
+drapich@c2 ~ % ssh $vps "which mount-smb"
+/home/drapich/bin/mount-smb
 \end{lstlisting}
-
-\textit{TODO: wkleić \texttt{export SMB\_USER=... SMB\_PASS=...},
-\texttt{mount-smb}, wynik \texttt{ls \TY/vps} z plikiem testowym z laptopa.}
 
 \section{Podsumowanie}
 
 \begin{itemize}
-\item \textbf{Zapora:} NSG w Azure (Unix/chmura); udostępnienie SMB na laptopie.
-\item \textbf{ZeroTier ADM:} VPS dołączony do sieci \texttt{8d1c312afa9a3adc}.
-\item \textbf{Kontener:} Docker + nginx, dostęp przez \texttt{\$vps} i \texttt{vps.adm}.
-\item \textbf{SMB:} montaż \texttt{\TY/vps} na VPS z laptopa.
+\item Zapora Unix: \texttt{gen-fw} (UFW) --- \textit{brak logu wykonania}.
+\item ZeroTier ADM: VPS \texttt{10.80.108.10/24} na \texttt{ztu7tkwebg}.
+\item Docker + WWW: \texttt{gen-kont} $\rightarrow$ dwa razy \texttt{HTTP/1.1 200 OK}.
+\item SMB: \texttt{plik.txt}, \texttt{test} w \texttt{\TY/vps} na VPS.
 \end{itemize}
+
+\section*{Do uzupełnienia przed oddaniem}
+
+\begin{enumerate}
+\item \textbf{gen-vps} --- log z \texttt{az/nsg} i \texttt{cat \TY/.vps}.
+\item \textbf{gen-fw} --- uruchomić i wkleić \texttt{ufw status}.
+\item \textbf{ZeroTier} --- \texttt{zerotier-cli listnetworks} (status \texttt{OK}).
+\item \textbf{Docker} --- \texttt{ssh \$vps "sudo docker ps"}.
+\item \textbf{Schemat ADM.svg} --- poprawić IP VPS na \texttt{.10}.
+\item \textbf{Windows} --- opcjonalnie zapora/Edit-smb, jeśli prowadzący wymaga obu systemów.
+\item \textbf{Ping ADM} --- \texttt{ping vps.adm} z c2 lub MacBooka (jeśli \texttt{/etc/hosts}).
+\end{enumerate}
 
 \end{document}
