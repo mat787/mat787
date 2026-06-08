@@ -1,0 +1,5 @@
+#!/bin/sh
+d=~/vps; mkdir -p $d
+sudo pacman -S --needed --noconfirm cifs-utils
+sudo mount -t cifs //lap.adm/vps $d -o user=$SMB_USER,pass=$SMB_PASS,uid=$(id -u),vers=3.0
+ls $d
