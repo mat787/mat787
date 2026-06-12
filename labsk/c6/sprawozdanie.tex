@@ -143,6 +143,7 @@ drapich@c2 ~ % ssh $vps "which mount-smb"
 \section{Podsumowanie}
 
 \begin{itemize}
+\item Zapora Windows: \texttt{LabSK SMB In/Out} (TCP 445, PowerShell).
 \item Zapora Unix/chmura: \texttt{LabSK-NSG} (SSH 22, ICMP, ZT 9993, HTTP/S 80/443, SMB 445).
 \item ZeroTier ADM: VPS \texttt{10.80.108.10/24} na \texttt{ztu7tkwebg}.
 \item Docker + WWW: \texttt{gen-kont} $\rightarrow$ dwa razy \texttt{HTTP/1.1 200 OK}.
@@ -152,8 +153,8 @@ drapich@c2 ~ % ssh $vps "which mount-smb"
 \section*{Do uzupełnienia przed oddaniem}
 
 \begin{enumerate}
-\item \textbf{gen-vps} --- log z \texttt{az/nsg} i \texttt{cat \TY/.vps}.
-\item \textbf{gen-fw} --- uruchomić i wkleić \texttt{ufw status}.
+\item \textbf{gen-vps} --- reszta logu (\texttt{cat \TY/.vps}, klucz SSH) --- opcjonalnie.
+\item \textbf{gen-fw} --- opcjonalnie \texttt{ufw status} na VPS.
 \item \textbf{ZeroTier} --- \texttt{zerotier-cli listnetworks} (status \texttt{OK}).
 \item \textbf{Docker} --- \texttt{ssh \$vps "sudo docker ps"}.
 \item \textbf{Schemat ADM.svg} --- poprawić IP VPS na \texttt{.10}.
