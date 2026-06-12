@@ -44,20 +44,23 @@ oraz montaż udziału SMB z laptopa. Pracę wykonano na stacji \texttt{c2}.
 
 \section{Konfiguracja zapory internetowej}
 
-\subsection{Unix -- UFW na VPS (\texttt{gen-fw})}
+\subsection{Unix -- Azure NSG (\texttt{gen-vps})}
 
-Skrypt \texttt{gen-fw} konfiguruje na VPS zaporę \texttt{ufw}: domyślnie
-blokuje ruch przychodzący, przepuszcza ZeroTier (UDP 9993) i SSH z interfejsu ZT.
+Skrypt \texttt{gen-vps} (\texttt{az/nsg -a}) tworzy grupę \texttt{LabSK-NSG}
+i reguły zapory w chmurze.
 
-\textit{TODO: wkleić wynik \texttt{bin/gen-fw} oraz
-\texttt{ssh \$vps "sudo ufw status verbose"}.}
-
-\subsection{Unix -- Azure NSG}
-
-Grupa \texttt{LabSK-NSG} tworzona jest przez \texttt{gen-vps}
-(\texttt{az/nsg -a}): SSH, ICMP, ZeroTier, HTTP/HTTPS.
-
-\textit{TODO: wkleić z \texttt{gen-vps} linie \texttt{Dodanie reguły Allow...}.}
+\begin{lstlisting}
+drapich@c2 ~ % gen-vps
+Kreacja grupy bezpieczeństwa sieci LabSK-NSG in LabSK ...
+Nowa grupa NSG LabSK-NSG ...
+Dodanie reguły AllowSSHInbound (22 Tcp) ...
+Dodanie reguły AllowICMPInbound (* Icmp) ...
+Dodanie reguły AllowZeroTierInbound (9993 Udp) ...
+Dodanie reguły AllowHTTPInbound (80 Tcp) ...
+Dodanie reguły AllowHTTPSInbound (443 Tcp) ...
+Dodanie reguły AllowSMBInbound (445 Tcp) ...
+Grupa LabSK-NSG gotowa
+\end{lstlisting}
 
 \subsection{Konfiguracja firewalla na Windowsie}
 
@@ -140,8 +143,7 @@ drapich@c2 ~ % ssh $vps "which mount-smb"
 \section{Podsumowanie}
 
 \begin{itemize}
-\item Zapora Windows: reguły \texttt{LabSK SMB In/Out} (PowerShell, TCP 445).
-\item Zapora Unix: \texttt{gen-fw} (UFW) --- \textit{brak logu wykonania}.
+\item Zapora Unix/chmura: \texttt{LabSK-NSG} (SSH 22, ICMP, ZT 9993, HTTP/S 80/443, SMB 445).
 \item ZeroTier ADM: VPS \texttt{10.80.108.10/24} na \texttt{ztu7tkwebg}.
 \item Docker + WWW: \texttt{gen-kont} $\rightarrow$ dwa razy \texttt{HTTP/1.1 200 OK}.
 \item SMB: \texttt{plik.txt}, \texttt{test} w \texttt{\TY/vps} na VPS.
