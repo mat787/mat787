@@ -61,39 +61,17 @@ Grupa \texttt{LabSK-NSG} tworzona jest przez \texttt{gen-vps}
 
 \subsection{Konfiguracja firewalla na Windowsie}
 
-W PowerShell (konto administratora) skonfigurowano zaporę pod udostępnienie SMB:
-reguły \texttt{LabSK SMB In/Out} dla portu TCP 445 (profil \texttt{Private}),
-oraz włączono \texttt{File And Printer Sharing} i \texttt{Network Discovery}.
+PowerShell (admin): reguły SMB TCP 445, profil \texttt{Private}.
 
 \begin{lstlisting}
-PS C:\Users\Matylda> New-NetFirewallRule -DisplayName "LabSK SMB In" -Direction Inbound -Protocol TCP -LocalPort 445 -Action Allow -Profile Private
-DisplayName : LabSK SMB In
-Enabled     : True
-Profile     : Private
-Direction   : Inbound
-Action      : Allow
-PrimaryStatus : OK
-
-PS C:\Users\Matylda> New-NetFirewallRule -DisplayName "LabSK SMB Out" -Direction Outbound -Protocol TCP -RemotePort 445 -Action Allow -Profile Private
-DisplayName : LabSK SMB Out
-Enabled     : True
-Profile     : Private
-Direction   : Outbound
-Action      : Allow
-PrimaryStatus : OK
-
-PS C:\Users\Matylda> Enable-NetFirewallRule -DisplayGroup "File And Printer Sharing"
-PS C:\Users\Matylda> Enable-NetFirewallRule -DisplayGroup "Network Discovery"
-PS C:\Users\Matylda> Get-NetFirewallRule -DisplayName "LabSK SMB*" | Format-Table DisplayName, Enabled, Direction, Action
-
-DisplayName   Enabled Direction Action
------------   ------- --------- ------
+PS> New-NetFirewallRule -DisplayName "LabSK SMB In" -Direction Inbound -Protocol TCP -LocalPort 445 -Action Allow -Profile Private
+PS> New-NetFirewallRule -DisplayName "LabSK SMB Out" -Direction Outbound -Protocol TCP -RemotePort 445 -Action Allow -Profile Private
+PS> Enable-NetFirewallRule -DisplayGroup "File And Printer Sharing"
+PS> Enable-NetFirewallRule -DisplayGroup "Network Discovery"
+PS> Get-NetFirewallRule -DisplayName "LabSK SMB*" | Format-Table DisplayName, Enabled, Direction, Action
 LabSK SMB In     True   Inbound  Allow
 LabSK SMB Out    True  Outbound  Allow
 \end{lstlisting}
-
-Reguły są aktywne (\texttt{Enabled: True}); ruch SMB (port 445) dozwolony
-w sieci prywatnej --- wymagane do montażu udziału SMB z serwera VPS.
 
 \subsection{Udostępnienie SMB (macOS / montaż na VPS)}
 
