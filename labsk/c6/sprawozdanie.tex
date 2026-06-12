@@ -65,13 +65,18 @@ PowerShell (admin): reguły SMB TCP 445, profil \texttt{Private}.
 
 \begin{lstlisting}
 PS> New-NetFirewallRule -DisplayName "LabSK SMB In" -Direction Inbound -Protocol TCP -LocalPort 445 -Action Allow -Profile Private
+Enabled=True  Direction=Inbound  Action=Allow  Profile=Private
 PS> New-NetFirewallRule -DisplayName "LabSK SMB Out" -Direction Outbound -Protocol TCP -RemotePort 445 -Action Allow -Profile Private
+Enabled=True  Direction=Outbound  Action=Allow  Profile=Private
 PS> Enable-NetFirewallRule -DisplayGroup "File And Printer Sharing"
 PS> Enable-NetFirewallRule -DisplayGroup "Network Discovery"
-PS> Get-NetFirewallRule -DisplayName "LabSK SMB*" | Format-Table DisplayName, Enabled, Direction, Action
+PS> Get-NetFirewallRule -DisplayName "LabSK SMB*" | Format-Table DisplayName,Enabled,Direction,Action
 LabSK SMB In     True   Inbound  Allow
 LabSK SMB Out    True  Outbound  Allow
 \end{lstlisting}
+
+\textit{Po \texttt{Enable-NetFirewallRule} brak komunikatu --- reguły grup włączone.
+Opcjonalny dowód: \texttt{Get-NetFirewallRule -DisplayGroup "File And Printer Sharing" | ? Enabled -eq True | Select -First 1 Enabled}.}
 
 \subsection{Udostępnienie SMB (macOS / montaż na VPS)}
 
