@@ -1,0 +1,25 @@
+#!/bin/sh
+test -f ~/.ssh/id_ed25519.pub || ssh-keygen -t ed25519 -f ~/.ssh/id_ed25519 -N ""
+/pub/Linux/zetis/bin/az/register; /pub/Linux/zetis/bin/az/nsg -a
+/pub/Linux/zetis/bin/az/archlinux -k; /pub/Linux/zetis/bin/az/archlinux -s
+echo $USER.polandcentral.cloudapp.azure.com >~/.vps
+echo 'vps=$(cat ~/.vps); export vps' >~/.zshrc.local
+grep -q zshrc.local ~/.zshrc 2>/dev/null || echo '. ~/.zshrc.local' >>~/.zshrc
+IP=$(az network public-ip show -n $USER --query ipAddress -o tsv)
+C=$HOME/.ssh/config; mkdir -p $HOME/.ssh && chmod 700 $HOME/.ssh
+test -f $C && awk '/^Host vps$/{s=1;next} /^Host /{if(s)s=0} !s' $C >$C.t && mv $C.t $C
+cat >>$C <<E
+Host vps
+	HostName $IP
+	User $USER
+	IdentityFile ~/.ssh/id_ed25519
+E
+chmod 600 $C; . ~/.zshrc.local
+sleep 20
+ssh $(cat ~/.vps) <<'E'
+sudo pacman -Syy --noconfirm
+sudo pacman -S --needed --noconfirm zerotier-one
+sudo systemctl enable --now zerotier-one.service
+sudo zerotier-cli join 8d1c312afa9a3adc
+E
+echo $IP vps $(cat ~/.vps)

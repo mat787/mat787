@@ -1,0 +1,8 @@
+LabSK c6 - minimalne skrypty /bin/sh na c2
+Rekwizyt: ssh $srv do VPS w sieci ZeroTier ADM
+
+1. gen-vps     - nowy VPS Azure + ~/.vps + $vps + ZeroTier ADM
+2. mount-smb   - na VPS: montowanie udziału SMB z laptopa (~/vps)
+3. gen-kont    - na c2: docker nginx na VPS, test $vps i vps.adm
+
+NetID ADM: 8d1c312afa9a3adc

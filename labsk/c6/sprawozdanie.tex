@@ -1,0 +1,164 @@
+\documentclass[a4paper,11pt]{article}
+\usepackage[T1]{polski}
+\usepackage[utf8]{inputenc}
+\usepackage{xcolor}
+\usepackage{titlesec}
+\usepackage{graphicx}
+\usepackage[inkscapeformat=pdf]{svg}
+\usepackage{listings}
+\usepackage{float}
+
+\lstdefinestyle{custom}{
+    backgroundcolor=\color{white},
+    inputencoding=utf8,
+    extendedchars=\true,
+    breaklines=true,
+    basicstyle=\ttfamily\footnotesize,
+    tabsize=1
+}
+\lstset{style=custom}
+\titlespacing*{\section}{0pt}{6pt}{3pt}
+\titlespacing*{\subsection}{0pt}{4pt}{2pt}
+\hoffset=-3.0cm
+\textwidth=18cm
+\evensidemargin=0pt
+\voffset=-3cm
+\textheight=27cm
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{\medskipamount}
+\raggedbottom
+\newcommand\TY{\raise.17ex\hbox{$\scriptstyle\mathtt{\sim}$}}
+
+\author{Matylda Drapich}
+\title{Laboratorium sieci komputerowych\\ćw.6\\Serwer w chmurze, ZeroTier, kontener i SMB}
+\frenchspacing
+
+\begin{document}
+\thispagestyle{empty}
+\maketitle
+
+\vspace{-0.5em}
+Celem ćwiczenia była konfiguracja zapory (Windows/Unix), podłączenie VPS
+w Azure do sieci ZeroTier ADM, uruchomienie kontenera Docker z usługą WWW
+oraz montaż udziału SMB z laptopa. Pracę wykonano na stacji \texttt{c2}.
+
+\section{Konfiguracja zapory internetowej}
+
+\subsection{Unix -- Azure NSG (\texttt{gen-vps})}
+
+Skrypt \texttt{gen-vps} (\texttt{az/nsg -a}) tworzy grupę \texttt{LabSK-NSG}
+i reguły zapory w chmurze.
+
+\begin{lstlisting}
+drapich@c2 ~ % gen-vps
+Kreacja grupy bezpieczeństwa sieci LabSK-NSG in LabSK ...
+Nowa grupa NSG LabSK-NSG ...
+Dodanie reguły AllowSSHInbound (22 Tcp) ...
+Dodanie reguły AllowICMPInbound (* Icmp) ...
+Dodanie reguły AllowZeroTierInbound (9993 Udp) ...
+Dodanie reguły AllowHTTPInbound (80 Tcp) ...
+Dodanie reguły AllowHTTPSInbound (443 Tcp) ...
+Dodanie reguły AllowSMBInbound (445 Tcp) ...
+Grupa LabSK-NSG gotowa
+\end{lstlisting}
+
+\subsection{Konfiguracja firewalla na Windowsie}
+
+PowerShell (admin): reguły SMB TCP 445, profil \texttt{Private}.
+
+\begin{lstlisting}
+PS> New-NetFirewallRule -DisplayName "LabSK SMB In" -Direction Inbound -Protocol TCP -LocalPort 445 -Action Allow -Profile Private
+Enabled=True  Direction=Inbound  Action=Allow  Profile=Private
+PS> New-NetFirewallRule -DisplayName "LabSK SMB Out" -Direction Outbound -Protocol TCP -RemotePort 445 -Action Allow -Profile Private
+Enabled=True  Direction=Outbound  Action=Allow  Profile=Private
+PS> Enable-NetFirewallRule -DisplayGroup "File And Printer Sharing"
+PS> Enable-NetFirewallRule -DisplayGroup "Network Discovery"
+PS> Get-NetFirewallRule -DisplayName "LabSK SMB*" | Format-Table DisplayName,Enabled,Direction,Action
+LabSK SMB In     True   Inbound  Allow
+LabSK SMB Out    True  Outbound  Allow
+\end{lstlisting}
+
+\textit{Po \texttt{Enable-NetFirewallRule} brak komunikatu --- reguły grup włączone.
+Opcjonalny dowód: \texttt{Get-NetFirewallRule -DisplayGroup "File And Printer Sharing" | ? Enabled -eq True | Select -First 1 Enabled}.}
+
+\subsection{Udostępnienie SMB (macOS / montaż na VPS)}
+
+Katalog \texttt{\TY/vps} udostępniono z laptopa (\texttt{10.80.108.105},
+użytkownik \texttt{mat}). Montaż na VPS: \texttt{//10.80.108.105/vps}.
+
+\section{Podłączenie VPS do sieci ZeroTier ADM}
+
+Sieć ADM: NetID \texttt{8d1c312afa9a3adc}, zakres \texttt{10.80.108.0/24}.
+VPS otrzymał adres \texttt{10.80.108.10}, laptop \texttt{10.80.108.105}.
+
+\subsection{Logowanie i interfejs ZT}
+
+\begin{lstlisting}
+drapich@c2 ~ % ssh $vps
+arch%
+drapich@c2 ~ % ssh $vps ipb a
+ztu7tkwebg UNKNOWN 10.80.108.10/24 ...
+docker0      UP     172.17.0.1/16 ...
+\end{lstlisting}
+
+\textit{TODO: \texttt{cat \TY/.vps}, \texttt{ssh \$(cat \TY/.vps) hostname},
+\texttt{ssh \$vps "sudo zerotier-cli listnetworks"}.}
+
+\begin{figure}[H]
+  \centering
+  \includesvg[width=0.58\textwidth]{ADM.svg}
+  \caption{Schemat sieci ADM (VPS \texttt{.10}, laptop \texttt{.105})}
+\end{figure}
+
+\textit{TODO: zaktualizować rysunek ADM --- adres VPS to \texttt{.10}, nie \texttt{.71}.}
+
+\section{Kontener Docker i usługa WWW (\texttt{gen-kont})}
+
+Kontener \texttt{web} (nginx) uruchomiono na VPS. Dostęp zweryfikowano
+publicznie (\texttt{\$vps}) i przez sieć ADM.
+
+\begin{lstlisting}
+drapich@c2 ~ % gen-kont
+web
+512d659b0b9a81db94921866d1655969484d648f9e46cbe6636bffd998877bec
+HTTP/1.1 200 OK
+HTTP/1.1 200 OK
+drapich@c2 ~ % curl http://$vps
+<h1>Welcome to nginx!</h1>
+\end{lstlisting}
+
+\textit{TODO: \texttt{ssh \$vps "sudo docker ps"} --- potwierdzenie kontenera \texttt{web}.}
+
+\section{Usługa SMB (\texttt{mount-smb})}
+
+Udział SMB zamontowano na VPS w \texttt{\TY/vps}; widoczne pliki z laptopa.
+
+\begin{lstlisting}
+drapich@c2 ~ % ssh $vps ls vps
+plik.txt  test
+drapich@c2 ~ % ssh $vps "which mount-smb"
+/home/drapich/bin/mount-smb
+\end{lstlisting}
+
+\section{Podsumowanie}
+
+\begin{itemize}
+\item Zapora Windows: \texttt{LabSK SMB In/Out} (TCP 445, PowerShell).
+\item Zapora Unix/chmura: \texttt{LabSK-NSG} (SSH 22, ICMP, ZT 9993, HTTP/S 80/443, SMB 445).
+\item ZeroTier ADM: VPS \texttt{10.80.108.10/24} na \texttt{ztu7tkwebg}.
+\item Docker + WWW: \texttt{gen-kont} $\rightarrow$ dwa razy \texttt{HTTP/1.1 200 OK}.
+\item SMB: \texttt{plik.txt}, \texttt{test} w \texttt{\TY/vps} na VPS.
+\end{itemize}
+
+\section*{Do uzupełnienia przed oddaniem}
+
+\begin{enumerate}
+\item \textbf{gen-vps} --- reszta logu (\texttt{cat \TY/.vps}, klucz SSH) --- opcjonalnie.
+\item \textbf{gen-fw} --- opcjonalnie \texttt{ufw status} na VPS.
+\item \textbf{ZeroTier} --- \texttt{zerotier-cli listnetworks} (status \texttt{OK}).
+\item \textbf{Docker} --- \texttt{ssh \$vps "sudo docker ps"}.
+\item \textbf{Schemat ADM.svg} --- poprawić IP VPS na \texttt{.10}.
+\item \textbf{Ping ADM} --- \texttt{ping vps.adm} z c2 lub MacBooka (jeśli \texttt{/etc/hosts}).
+\end{enumerate}
+
+\end{document}

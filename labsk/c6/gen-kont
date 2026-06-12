@@ -1,0 +1,10 @@
+#!/bin/sh
+. ~/.zshrc.local
+ssh $vps <<'E'
+sudo pacman -S --needed --noconfirm docker
+sudo systemctl enable --now docker
+sudo docker rm -f web 2>/dev/null
+sudo docker run -d --name web -p 8080:80 nginx
+E
+curl -sI http://$vps:8080 | head -1
+curl -sI http://vps.adm:8080 | head -1
