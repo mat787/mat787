@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="pl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Portfolio Matyldy Drapich — analityczki danych rozwijającej projekty z obszaru data science i machine learning."
+    />
+    <meta name="theme-color" content="#f5ff66" />
+    <link rel="icon" href="./favicon.svg" type="image/svg+xml" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./src/style.css" />
+    <title>Matylda Drapich — Data & ML</title>
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Przejdź do treści</a>
+    <div class="noise" aria-hidden="true"></div>
+    <div class="cursor" aria-hidden="true">
+      <span class="cursor__ring"></span>
+      <span class="cursor__dot"></span>
+    </div>
+
+    <header class="site-header">
+      <a class="logo magnetic" href="#top" aria-label="Wróć na początek">
+        <span data-content="initials">MD</span><i></i>
+      </a>
+      <nav aria-label="Główna nawigacja">
+        <a class="nav-link magnetic" href="#work">Projekty</a>
+        <a class="nav-link magnetic" href="#about">O mnie</a>
+        <a class="nav-link magnetic" href="#experience">Doświadczenie</a>
+        <a class="nav-link magnetic" href="#contact">Kontakt</a>
+      </nav>
+      <button class="sound-toggle magnetic" type="button" aria-pressed="false">
+        <span class="sound-icon" aria-hidden="true">
+          <i></i><i></i><i></i>
+        </span>
+        <span class="sound-label">Dźwięk wył.</span>
+      </button>
+    </header>
+
+    <main id="main">
+      <section class="hero" id="top" aria-labelledby="hero-title">
+        <div class="hero__eyebrow reveal">
+          <span class="status-dot" aria-hidden="true"></span>
+          <span data-content="availability">Otwarta na staż i junior role · Data / ML</span>
+        </div>
+        <h1 id="hero-title" class="hero__title" aria-label="Dane, modele, wnioski">
+          <span class="title-line title-line--one reveal">DANE</span>
+          <span class="title-line title-line--two reveal">
+            MODELE
+            <span class="sticker sticker--star" aria-hidden="true">✦</span>
+          </span>
+          <span class="title-line title-line--three reveal">
+            I <em>WNIOSKI</em><span class="title-dot">.</span>
+          </span>
+        </h1>
+        <div class="hero__footer reveal">
+          <p data-content="intro">
+            Jestem Matylda — łączę analizę danych, uczenie maszynowe i ciekawość,
+            żeby z chaosu wyciągać sensowne odpowiedzi.
+          </p>
+          <a class="round-link magnetic" href="#work" aria-label="Zobacz wybrane projekty">
+            <span>Zobacz<br />projekty</span>
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M12 4v15m-6-6 6 6 6-6" />
+            </svg>
+          </a>
+        </div>
+        <div class="marquee" aria-hidden="true">
+          <div class="marquee__track">
+            <span>PYTHON ✦ SQL ✦ DATA ✦ MACHINE LEARNING ✦ </span>
+            <span>PYTHON ✦ SQL ✦ DATA ✦ MACHINE LEARNING ✦ </span>
+          </div>
+        </div>
+      </section>
+
+      <section class="work section-shell" id="work" aria-labelledby="work-title">
+        <div class="section-heading">
+          <p class="kicker">01 / Wybrane projekty</p>
+          <h2 id="work-title">Zbudowane<br /><em>od danych.</em></h2>
+          <p class="section-note">Kod, analiza, wnioski.</p>
+        </div>
+        <div class="project-grid" data-projects></div>
+      </section>
+
+      <section class="about section-shell" id="about" aria-labelledby="about-title">
+        <div class="about__orbit" aria-hidden="true">
+          <div class="orbit-copy">DATA ANALYST · ML EXPLORER · PROBLEM SOLVER ·</div>
+          <div class="orbit-face">:)</div>
+        </div>
+        <div class="about__copy">
+          <p class="kicker">02 / O mnie</p>
+          <h2 id="about-title">
+            Dane to mój <em>plac zabaw.</em>
+          </h2>
+          <p data-content="about">
+            Studiuję informatykę stosowaną na Politechnice Warszawskiej i pracuję
+            jako Junior Data Analyst w REDS S.A. Najbardziej kręcą mnie projekty,
+            w których dane trzeba najpierw oswoić, a potem zamienić w decyzje.
+          </p>
+          <div class="toolbox">
+            <p>Mój toolbox</p>
+            <ul data-skills aria-label="Umiejętności"></ul>
+          </div>
+        </div>
+      </section>
+
+      <section class="experience section-shell" id="experience" aria-labelledby="experience-title">
+        <div class="experience__heading">
+          <p class="kicker">03 / Doświadczenie</p>
+          <h2 id="experience-title">Co robię<br /><em>poza kodem.</em></h2>
+        </div>
+        <div class="timeline">
+          <article>
+            <p class="timeline__date">10.2026 — teraz</p>
+            <div>
+              <h3>Junior Data Analyst · REDS S.A.</h3>
+              <p>Analiza danych operacyjnych kolei w SQL, wizualizacje 2D/3D w R i optymalizacja rozkładu rezerw czasowych między przystankami.</p>
+            </div>
+          </article>
+          <article>
+            <p class="timeline__date">10.2026 — teraz</p>
+            <div>
+              <h3>Tech Ambassador · EY</h3>
+              <p>Organizacja i promocja wydarzeń technologicznych dla studentów Politechniki Warszawskiej.</p>
+            </div>
+          </article>
+          <article>
+            <p class="timeline__date">02.2026 — teraz</p>
+            <div>
+              <h3>Core Team · GDG on Campus WUT</h3>
+              <p>Logistyka wydarzeń dla ponad 80 osób, planowanie budżetu i koordynacja pracy zespołu.</p>
+            </div>
+          </article>
+          <article>
+            <p class="timeline__date">2024 — 2028</p>
+            <div>
+              <h3>Informatyka stosowana · Politechnika Warszawska</h3>
+              <p>Specjalizacja: Inżynieria Danych i Multimedia · średnia 4,22/5,0.</p>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section class="contact section-shell" id="contact" aria-labelledby="contact-title">
+        <p class="kicker">04 / Kontakt</p>
+        <h2 id="contact-title">Zróbmy coś<br /><em>z danymi.</em></h2>
+        <a class="email-link magnetic" data-content="email-link" href="mailto:matyldadrapich@gmail.com">
+          <span data-content="email">matyldadrapich@gmail.com</span>
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M5 19 19 5M8 5h11v11" />
+          </svg>
+        </a>
+        <div class="contact__footer">
+          <p>© <span data-year></span> <span data-content="name">Matylda Drapich</span></p>
+          <div class="socials" data-socials></div>
+          <a href="#top">Do góry ↑</a>
+        </div>
+      </section>
+    </main>
+
+    <div class="toast" role="status" aria-live="polite"></div>
+    <script type="module" src="./src/main.js"></script>
+  </body>
+</html>

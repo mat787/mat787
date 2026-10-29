@@ -1,16 +1,22 @@
-## Hi there 👋
+# Portfolio Matyldy Drapich
 
-<!--
-**mat787/mat787** is a ✨ _special_ ✨ repository because its `README.md` (this file) appears on your GitHub profile.
+Responsywne portfolio analityczki danych zbudowane w Vite i czystym JavaScript. Zawiera projekty Data/ML, doświadczenie, podglądy analiz, dostępny niestandardowy kursor, opcjonalne dźwięki interfejsu oraz obsługę ograniczenia animacji.
 
-Here are some ideas to get you started:
+## Edycja treści
 
-- 🔭 I’m currently working on ...
-- 🌱 I’m currently learning ...
-- 👯 I’m looking to collaborate on ...
-- 🤔 I’m looking for help with ...
-- 💬 Ask me about ...
-- 📫 How to reach me: ...
-- 😄 Pronouns: ...
-- ⚡ Fun fact: ...
--->
+Główne dane, linki, umiejętności i projekty znajdują się w obiekcie `content` na początku [`src/main.js`](./src/main.js).
+
+## Uruchomienie lokalne
+
+```bash
+npm install
+npm run dev
+```
+
+Wersję produkcyjną tworzy polecenie `npm run build`.
+
+## Publikacja
+
+Workflow `.github/workflows/deploy-pages.yml` buduje i publikuje stronę po zmianach na `main`. W ustawieniach repozytorium należy wybrać **Pages → Build and deployment → Source → GitHub Actions**.
+
+Grafiki projektów pochodzą z własnych repozytoriów Matyldy, a dźwięki są generowane lokalnie w przeglądarce.
